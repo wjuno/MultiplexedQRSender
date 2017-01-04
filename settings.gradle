@@ -1,0 +1,3 @@
+include ':app'
+//include ':libraries:libs'
+include ':libraries:libs:opencv'

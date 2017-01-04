@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:text="Enter Port Number :"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:id="@+id/lbl_portNo"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="67dp" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:maxLength="5"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="150dp"
+        android:id="@+id/edit_portNo" />
+
+
+    <Button
+        android:id="@+id/btn_encode"
+        android:background="@drawable/button"
+        android:text="Encode"
+        android:layout_gravity="bottom|end"
+        android:textColor="#000"
+        android:layout_height="wrap_content"
+        android:layout_width="149dp"
+        android:minHeight="57dp"
+        android:minWidth="50dp"
+        android:layout_marginTop="250dp" />
+</LinearLayout>

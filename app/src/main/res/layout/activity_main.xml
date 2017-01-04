@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.weijun.multiplexedqr.MainActivity"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/labelText_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        android:text="Send Text File"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/button_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:background="@drawable/button"
+        android:text="Send file"
+        android:layout_below="@+id/labelText_id"
+        android:layout_toEndOf="@+id/btn_camera"
+        android:textColor="#000"
+        android:layout_gravity="center_horizontal" />
+
+
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="50dp"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <!--
+        <Button
+            android:id="@+id/btn_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:text="Camera"
+            android:layout_alignTop="@+id/button_send"
+            android:layout_toStartOf="@+id/labelText_id"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="10dp"
+            android:layout_marginTop="100dp"
+            android:textColor="#000"
+            android:layout_weight="0.35" />
+            -->
+
+        <Button
+            android:id="@+id/btn_takeQR"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:text="Take QR"
+            android:layout_alignTop="@+id/button_send"
+            android:layout_toStartOf="@+id/labelText_id"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="10dp"
+            android:layout_marginTop="100dp"
+            android:textColor="#000"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.35" />
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">MultiplexedQr</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_display_qr">DisplayQR</string>
+    <string name="title_activity_takepic">Take Pic</string>
+    <string name="title_activity_display_bitmap">DisplayBitmap</string>
+    <string name="title_activity_sender_screen">SenderScreen</string>
+    <string name="title_activity_display_port_qr">DisplayPortQR</string>
+    <string name="title_activity_mutual_passcode">MutualPasscode</string>
+    <string name="title_activity_take_qrcode">TakeQRCode</string>
+    <string name="title_activity_receiver_view">ReceiverView</string>
+    <string name="title_activity_receiver_input_view">ReceiverInputView</string>
+
+</resources>
