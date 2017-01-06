@@ -38,30 +38,21 @@ import java.io.File;
 
 
 
+// TODO : Remove directory menu
+// TODO : Remove validation, prompt user to enter mutual passcode to receive object
+// TODO : Resolve bug during decoding
+// TODO : Enable start signal and end signal for sending
 
 @SuppressLint("NewApi")
 public class MainActivity extends AppCompatActivity {
-	private Button mSendBtn;
-	//private Button mCameraBtn;
-	private Button mQRbtn;
-
-	//private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
-	private static final int PICKFILE_RESULT_CODE = 100;
-
-	public final static String EXTRA_MESSAGE = "com.example.MULTIPLEXEDQR";
-	//public static final int MEDIA_TYPE_VIDEO = 2;
-	//public static final int MEDIA_TYPE_IMAGE = 1;
-
 	final int ACTIVITY_CHOOSE_FILE = 4;
 	final int RESULT_LOAD_IMAGE=5;
 
-	//ArrayList<File> fileNames = new ArrayList<File>();
-	//ArrayList<String> dup = new ArrayList<String>();
+	public final static String EXTRA_MESSAGE = "com.example.MULTIPLEXEDQR";
 
-	//int flag;
-	//private File fileUri;
-
-	//MarshMallowPermission marshMallowPermission = new MarshMallowPermission(this);
+	private Button mSendBtn;
+	private Button mQRbtn;
+	private static final int PICKFILE_RESULT_CODE = 100;
 
 	// Storage Permissions
 	private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -127,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		}
 
-
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -137,9 +127,7 @@ public class MainActivity extends AppCompatActivity {
 		setup();
 	}
 
-
-
-	// init()
+	// initialization
 	private void setup() {
 		// Initialize the send button with a listener that for click events
 		mSendBtn = (Button) findViewById(R.id.button_send);
@@ -150,12 +138,11 @@ public class MainActivity extends AppCompatActivity {
 				// sendMessage();
 				Intent intent = new Intent(MainActivity.this, SenderView.class);
 				startActivity(intent);
-
 			}
 		});
 
 
-		// Read QR Code
+		// Reading from QR Code
 		mQRbtn = (Button) findViewById(R.id.btn_takeQR);
 		mQRbtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -178,9 +165,6 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		});
-
-
-
 	}
 
 
@@ -275,46 +259,3 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 }
-
-
-    /*
-	@SuppressLint("SimpleDateFormat")
-	private File getOutputMediaFile(int type){
-		// To be safe, you should check that the SDCard is mounted
-		// using Environment.getExternalStorageState() before doing this.
-
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
-
-		// This location works best if you want the created images to be shared
-		// between applications and persist after your app has been uninstalled.
-
-		// Create the storage directory if it does not exist
-		if (! mediaStorageDir.exists()){
-			if (! mediaStorageDir.mkdirs()){
-				Log.d("MyCameraApp", "failed to create directory");
-				return null;
-			}
-		}
-
-		// Create a media file name
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss.SSS").format(new Date());
-		File mediaFile;
-		if (type == MEDIA_TYPE_IMAGE){
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-					"IMG_"+ timeStamp + ".jpg");
-			fileNames.add(mediaFile);
-
-		} else if(type == MEDIA_TYPE_VIDEO) {
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-					"VID_"+ timeStamp + ".mp4");
-		} else {
-			return null;
-		}
-		return mediaFile;
-	}
-
-    */
-
-
-
-

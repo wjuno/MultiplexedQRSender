@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MultiplexedQr</string>
+    <string name="app_name">Multiplexed Qr Sender</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

@@ -96,7 +96,7 @@ public class DisplayQRActivity extends AppCompatActivity {
 			else if (flag==1)
 				messagebyte = decodeimage(message);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e1.printStackTrace();
 		}
 	    try {
