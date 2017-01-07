@@ -29,7 +29,6 @@ public class SenderView extends Activity {
     private EditText portText;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +48,6 @@ public class SenderView extends Activity {
                 intent.putExtra("PortNumber", value);
                 intent.putExtra("SENDER",true);
                 startActivity(intent);
-
-
             }
         });
 

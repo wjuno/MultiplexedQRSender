@@ -44,7 +44,7 @@ import java.io.File;
 // TODO : Enable start signal and end signal for sending
 
 @SuppressLint("NewApi")
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 	final int ACTIVITY_CHOOSE_FILE = 4;
 	final int RESULT_LOAD_IMAGE=5;
 
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_fileFolder){
-			openFolder();
+			//openFolder();
 			return true;
 		}
 		if (id == R.id.action_start) {
@@ -244,18 +244,20 @@ public class MainActivity extends AppCompatActivity {
 			}
 		}
 	}
-
+}
 
 	// OPEN FOLDER / DIRECTORY
-	public void openFolder()
-	{
 
-		Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-		fileIntent.setType("*/*");
-		try {
-			startActivityForResult(fileIntent, PICKFILE_RESULT_CODE);
-		} catch (ActivityNotFoundException e) {
-			Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
-		}
-	}
-}
+//	public void openFolder()
+//	{
+//
+//		Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
+//		fileIntent.setType("*/*");
+//		try {
+//			startActivityForResult(fileIntent, PICKFILE_RESULT_CODE);
+//		} catch (ActivityNotFoundException e) {
+//			Log.e("tag", "No activity can handle picking a file. Showing alternatives.");
+//		}
+//	}
+
+
