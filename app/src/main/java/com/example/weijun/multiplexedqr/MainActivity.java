@@ -9,7 +9,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import android.database.Cursor;
@@ -19,8 +21,8 @@ import android.os.Bundle;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 
 
 import android.util.Log;
@@ -29,13 +31,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 import java.io.File;
-
 
 
 // TODO : Remove directory menu
@@ -45,14 +48,23 @@ import java.io.File;
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
+	TextView tv1;
+	EditText ed1;
+	Button btn1,btn2;
+
+
 	final int ACTIVITY_CHOOSE_FILE = 4;
 	final int RESULT_LOAD_IMAGE=5;
 
 	public final static String EXTRA_MESSAGE = "com.example.MULTIPLEXEDQR";
 
+
+
 	private Button mSendBtn;
 	private Button mQRbtn;
+
 	private static final int PICKFILE_RESULT_CODE = 100;
+
 
 	// Storage Permissions
 	private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -82,16 +94,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		verifyStoragePermissions(this);
+		// Initialize TextView, EditText and Button
+		tv1 = (TextView)findViewById(R.id.tv_display);
+		ed1 = (EditText)findViewById(R.id.et_connection);
+
 
 		if (!OpenCVLoader.initDebug()) {
 			// Handle initialization error
 		}
 	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -127,15 +146,15 @@ public class MainActivity extends Activity {
 		setup();
 	}
 
+
+
 	// initialization
 	private void setup() {
 		// Initialize the send button with a listener that for click events
 		mSendBtn = (Button) findViewById(R.id.button_send);
 		mSendBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// Send a message using content of the edit text widget
-				// old code
-				// sendMessage();
+
 				Intent intent = new Intent(MainActivity.this, SenderView.class);
 				startActivity(intent);
 			}
@@ -148,6 +167,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 
 				try {
+
 					IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
 					integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
 					integrator.setPrompt("Scan a QR code");
@@ -165,6 +185,38 @@ public class MainActivity extends Activity {
 				}
 			}
 		});
+
+		// Saving passcode
+		btn1 = (Button)findViewById(R.id.btn_saveConnection);
+		btn1.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// setting share preference (initializing)
+				SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+
+				// storing whatever text into sp
+				SharedPreferences.Editor editor = sharedPrefer.edit();
+				editor.putString("pwdcode", ed1.getText().toString());
+				editor.apply();
+				Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG).show();
+			}
+		});
+
+		// Displaying passcode
+		btn2 = (Button)findViewById(R.id.btn_displayConn);
+		btn2.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+
+				// retrieving passcode else is a empty string
+				String pwd = sharedPrefer.getString("pwdcode", "");
+				tv1.setText(pwd);
+			}
+		});
+
+
+
+
+
 	}
 
 
