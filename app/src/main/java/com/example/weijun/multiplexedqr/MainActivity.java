@@ -155,7 +155,8 @@ public class MainActivity extends Activity {
 		mSendBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 
-				Intent intent = new Intent(MainActivity.this, SenderView.class);
+				Intent intent = new Intent(MainActivity.this, SelectFiles.class);
+
 				startActivity(intent);
 			}
 		});

@@ -16,12 +16,13 @@ import com.google.zxing.WriterException;
 
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Intent;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
@@ -31,8 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -48,7 +48,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 @SuppressLint("NewApi")
-public class DisplayQRActivity extends AppCompatActivity {
+public class DisplayQRActivity extends Activity {
 	
 	// specify colors
 	public static final int RED = 0xFFFF0000;
@@ -60,11 +60,8 @@ public class DisplayQRActivity extends AppCompatActivity {
 
 	// initialize the height and width of QR code
 	int width = 750, height= 750;
-
-	//int flag;
-
-	// declare msg
-	String message = "";
+	int flag;
+	String message;
 
     final AnimationDrawable animDrawable = new AnimationDrawable();
 
@@ -72,36 +69,33 @@ public class DisplayQRActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setContentView(R.layout.displayqr);
-
-		// this line will stop the console from running background processing
-		ActionBar myActionBar = getSupportActionBar();
+		ActionBar myActionBar = getActionBar();
 		myActionBar.hide();
-
-
 		Intent intent = getIntent();
 
+// TODO : note that only file is working so far.
+// TODO : decode for image as well
 
 		// receive filepath msg here
 	    message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 	    int flag=intent.getFlags();
 	    String messagebyte = null;
 		try {
-			// decode if received flag = 0 from MainAcitivity - yet to decode
+			// decode if received flag = 0 decode file
 			if (flag==0)
 				messagebyte = decodefile(message);
 
-			//
+			// decode if received flag = 1 decode image
 			else if (flag==1)
 				messagebyte = decodeimage(message);
 		} catch (IOException e1) {
 			// Auto-generated catch block
 			e1.printStackTrace();
 		}
-	    try {
 
-			// encoding to multiplexed here.
+		// encoding to multiplexed here.
+	    try {
 			encodeqr(messagebyte);
 		} catch (WriterException e) {
 			e.printStackTrace();
@@ -170,7 +164,7 @@ public class DisplayQRActivity extends AppCompatActivity {
 	// MAIN ENCODING METHOD HERE
 	@SuppressWarnings("deprecation")
 	private void encodeqr(String b) throws WriterException{
-		//String str = new String(b);
+
 		DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);  
 
@@ -206,7 +200,7 @@ public class DisplayQRActivity extends AppCompatActivity {
 			i += ((b.length()/(x*3))+1);
 			sb=(b.substring(i, Math.min((i+b.length()/(x*3))+1,b.length())));
 			checksumstr=String.format("%1$2s", frameno)+String.format("%1$11s", String.valueOf(checksum(sb)))+sb+String.format("%1$3s", sb.length());
-			Log.d("app",checksumstr);
+			Log.d("checksum_string",checksumstr);
 
 			performQRencoding(checksumstr,colorcode);
 

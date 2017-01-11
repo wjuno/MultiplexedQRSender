@@ -107,6 +107,7 @@ public class SenderView extends Activity {
 
 
 
+    // enter string to normal qr code
     public Bitmap encodeStringQR(String msg){
 
 
