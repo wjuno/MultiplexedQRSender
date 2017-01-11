@@ -5,21 +5,10 @@
 
 
     <item
-        android:id="@+id/action_fileFolder"
+        android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:title="Open Folder"
+        android:title="Restart"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_start"
-        android:orderInCategory="100"
-        android:title="Start Recording"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_stop"
-        android:orderInCategory="100"
-        android:title="Stop Recording"
-        app:showAsAction="never" />
-
+    
 </menu>

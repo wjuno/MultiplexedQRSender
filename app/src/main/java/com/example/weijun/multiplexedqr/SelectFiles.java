@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 
 
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
+
 
 public class SelectFiles extends Activity {
 
@@ -48,6 +48,7 @@ public class SelectFiles extends Activity {
 
     }
 
+
     private void sendMessage() {
         String manufactures = android.os.Build.MANUFACTURER;
         if(manufactures.equalsIgnoreCase("samsung")){
@@ -58,6 +59,11 @@ public class SelectFiles extends Activity {
             Intent selectFile = new Intent(Intent.ACTION_GET_CONTENT);
             selectFile.setType("*/*");
             startActivityForResult(selectFile,ACTIVITY_CHOOSE_FILE);  }
+    }
+
+    public void backButton(View view){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
 

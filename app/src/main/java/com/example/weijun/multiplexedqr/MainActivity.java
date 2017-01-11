@@ -26,8 +26,6 @@ import android.support.v4.app.ActivityCompat;
 
 
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -95,7 +93,6 @@ public class MainActivity extends Activity {
 	}
 
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,41 +108,11 @@ public class MainActivity extends Activity {
 		}
 	}
 
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_fileFolder){
-			//openFolder();
-			return true;
-		}
-		if (id == R.id.action_start) {
-			return true;
-		}
-		if (id == R.id.action_stop){
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
-
 	@Override
 	public void onStart() {
 		super.onStart();
 		setup();
 	}
-
 
 
 	// initialization
@@ -214,10 +181,6 @@ public class MainActivity extends Activity {
 			}
 		});
 
-
-
-
-
 	}
 
 
@@ -242,21 +205,6 @@ public class MainActivity extends Activity {
 
 		switch (requestCode) {
 
-			case ACTIVITY_CHOOSE_FILE: {
-				if (resultCode == RESULT_OK) {
-					Uri uri = data.getData();
-					String filePath = uri.getPath();
-
-					// call DisplayQRActivity to convert to multiplexed QR
-					Intent intent = new Intent(this, DisplayQRActivity.class);
-
-					// passing the filepath and flag to DisplayQRActivity
-					intent.putExtra(EXTRA_MESSAGE, filePath);
-					intent.addFlags(0);
-					startActivity(intent);
-				}
-				break;
-			}
 			case RESULT_LOAD_IMAGE: {
 				if (resultCode == RESULT_OK) {
 					Uri selectedImage = data.getData();
@@ -313,4 +261,35 @@ public class MainActivity extends Activity {
 //		}
 //	}
 
+
+	// TOP MENU
+
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		// Inflate the menu; this adds items to the action bar if it is present.
+//		getMenuInflater().inflate(R.menu.main, menu);
+//
+//		return true;
+//	}
+//
+//
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		// Handle action bar item clicks here. The action bar will
+//		// automatically handle clicks on the Home/Up button, so long
+//		// as you specify a parent activity in AndroidManifest.xml.
+//		int id = item.getItemId();
+//		if (id == R.id.action_fileFolder){
+//			//openFolder();
+//			return true;
+//		}
+//		if (id == R.id.action_start) {
+//			return true;
+//		}
+//		if (id == R.id.action_stop){
+//			return true;
+//		}
+//
+//		return super.onOptionsItemSelected(item);
+//	}
 

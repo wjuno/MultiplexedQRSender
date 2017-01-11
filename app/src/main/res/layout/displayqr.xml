@@ -29,6 +29,31 @@
         android:textSize="18dp"
         android:textColor="#000" />
 
-    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+
+        <Button
+            android:text="Back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_back"
+            android:layout_weight="1"
+            android:layout_gravity="bottom|center"
+            android:onClick="backButton"/>
+
+        <Button
+            android:text="Start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_start"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:onClick="startEncoding"/>
+    </LinearLayout>
+
+
 
 </RelativeLayout>

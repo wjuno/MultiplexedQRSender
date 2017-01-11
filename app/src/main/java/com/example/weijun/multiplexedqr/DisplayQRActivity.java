@@ -32,7 +32,6 @@ import android.os.Handler;
 import android.os.Message;
 
 
-
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -40,8 +39,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import android.view.View;
 import android.widget.ImageView;
-
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -72,21 +71,25 @@ public class DisplayQRActivity extends Activity {
 		setContentView(R.layout.displayqr);
 		ActionBar myActionBar = getActionBar();
 		myActionBar.hide();
-		Intent intent = getIntent();
 
-// TODO : note that only file is working so far.
-// TODO : decode for image as well
+	}
+
+	// TODO : note that only file is working so far.
+	// TODO : decode for image as well
+	public void startEncoding(View view){
 
 		// receive filepath msg here
-	    message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
-	    int flag=intent.getFlags();
-	    String messagebyte = null;
+		Intent intent = getIntent();
+		message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+		int flag=intent.getFlags();
+		String messagebyte = null;
+
 		try {
 			// decode if received flag = 0 decode file
 			if (flag==0)
 				messagebyte = decodefile(message);
 
-			// decode if received flag = 1 decode image
+				// decode if received flag = 1 decode image
 			else if (flag==1)
 				messagebyte = decodeimage(message);
 		} catch (IOException e1) {
@@ -95,9 +98,12 @@ public class DisplayQRActivity extends Activity {
 		}
 
 		// encoding to multiplexed here.
-	    try {
+		try {
+
 			encodeqr(messagebyte);
+
 		} catch (WriterException e) {
+
 			e.printStackTrace();
 		}
 	}
@@ -105,17 +111,21 @@ public class DisplayQRActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.displayqr, menu);
+		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+
+			// this call the encoding function again
+			//startEncoding();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -266,6 +276,8 @@ public class DisplayQRActivity extends Activity {
 			bitmap1=Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		}
 	}
+
+
 	private String checksum(String sb){
 		byte[] bytes = sb.getBytes();
 	    Checksum checksumEngine = new CRC32();
@@ -273,7 +285,9 @@ public class DisplayQRActivity extends Activity {
 	    long checksum = checksumEngine.getValue();
 
 	    return Long.toString(checksum);
-	    }
+	}
+
+
 	private Bitmap overlay(Bitmap bmp1, Bitmap bmp2) {
 		Paint paint = new Paint();
         paint.setXfermode(new PorterDuffXfermode(Mode.ADD));
@@ -283,7 +297,6 @@ public class DisplayQRActivity extends Activity {
         canvas.drawBitmap(bmp2, new Matrix(), paint);
         return bmOverlay;
     }
-
 
 	//  generate the QR code
 	@SuppressWarnings("static-access")
@@ -309,11 +322,11 @@ public class DisplayQRActivity extends Activity {
 		
 		    Bitmap bitmap =qrCodeEncoder.encodeAsBitmap(color);
 		    bitmap=bitmap.createScaledBitmap(bitmap, width, width, false);
-
 		  
 			return bitmap;
 	
 	}
+
 	public static Bitmap invert(Bitmap src) {
         Bitmap output = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
         int A, R, G, B;
@@ -336,7 +349,16 @@ public class DisplayQRActivity extends Activity {
 
     	return output;
 	}
+
+	public void backButton(View view){
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
+	}
 }
+
+
+
+
 	/*
 	public static Bitmap changeBitmapContrastBrightness(Bitmap bmp)
 	{
