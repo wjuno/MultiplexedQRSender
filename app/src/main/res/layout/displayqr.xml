@@ -9,6 +9,8 @@
     tools:context="com.example.weijun.multiplexedqr.DisplayQRActivity"
     android:background="#fff">
 
+
+
     <ImageView
         android:id="@+id/qrCode1"
         android:layout_width="wrap_content"
@@ -50,8 +52,15 @@
             android:layout_height="wrap_content"
             android:id="@+id/btn_start"
             android:layout_gravity="bottom|center"
+            android:layout_weight="1" />
+        <Button
+            android:text="Done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_finish"
+            android:layout_gravity="bottom|center"
             android:layout_weight="1"
-            android:onClick="startEncoding"/>
+            android:visibility="gone"/>
     </LinearLayout>
 
 

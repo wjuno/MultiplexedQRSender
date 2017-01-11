@@ -121,10 +121,7 @@ public class MainActivity extends Activity {
 		mSendBtn = (Button) findViewById(R.id.button_send);
 		mSendBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-
-				Intent intent = new Intent(MainActivity.this, SelectFiles.class);
-
-				startActivity(intent);
+				sendMessage();
 			}
 		});
 
@@ -205,6 +202,21 @@ public class MainActivity extends Activity {
 
 		switch (requestCode) {
 
+			case ACTIVITY_CHOOSE_FILE: {
+				if (resultCode == RESULT_OK) {
+					Uri uri = data.getData();
+					String filePath = uri.getPath();
+
+					// call DisplayQRActivity to convert to multiplexed QR
+					Intent intent = new Intent(this, DisplayQRActivity.class);
+					// passing the filepath and flag to DisplayQRActivity
+					intent.putExtra(EXTRA_MESSAGE, filePath);
+					intent.addFlags(0);
+					startActivity(intent);
+				}
+				break;
+			}
+
 			case RESULT_LOAD_IMAGE: {
 				if (resultCode == RESULT_OK) {
 					Uri selectedImage = data.getData();
@@ -244,6 +256,18 @@ public class MainActivity extends Activity {
 				break;
 			}
 		}
+	}
+
+	private void sendMessage() {
+		String manufactures = android.os.Build.MANUFACTURER;
+		if(manufactures.equalsIgnoreCase("samsung")){
+			Intent intent = new Intent("com.sec.android.app.myfiles.PICK_DATA");
+			intent.putExtra("CONTENT_TYPE", "*/*");
+			startActivityForResult(intent, ACTIVITY_CHOOSE_FILE);
+		} else{
+			Intent selectFile = new Intent(Intent.ACTION_GET_CONTENT);
+			selectFile.setType("*/*");
+			startActivityForResult(selectFile,ACTIVITY_CHOOSE_FILE);  }
 	}
 }
 

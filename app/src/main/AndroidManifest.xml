@@ -51,7 +51,6 @@
         <activity
             android:name=".ReceiverInputView"
             android:label="@string/title_activity_receiver_input_view" />
-        <activity android:name=".SelectFiles"></activity>
     </application>
 
 </manifest>

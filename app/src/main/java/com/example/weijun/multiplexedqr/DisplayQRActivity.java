@@ -18,6 +18,7 @@ import com.google.zxing.WriterException;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 
 import android.graphics.Canvas;
@@ -27,6 +28,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,10 +38,10 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import android.view.Menu;
-import android.view.MenuItem;
+
 
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
@@ -56,6 +58,10 @@ public class DisplayQRActivity extends Activity {
 
 	// declare bitmap for RGB
 	Bitmap bitmap,bitmap1,bitmap2;
+	Button startBtn,finishBtn;
+
+
+
 
 	// initialize the height and width of QR code
 	int width = 750, height= 750;
@@ -72,68 +78,110 @@ public class DisplayQRActivity extends Activity {
 		ActionBar myActionBar = getActionBar();
 		myActionBar.hide();
 
+		// Initialize the send button with a listener that for click events
+		startBtn = (Button) findViewById(R.id.btn_start);
+		finishBtn = (Button) findViewById(R.id.btn_finish);
+		startBtn.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				new doit().execute();
+
+				// make finish button visible
+				startBtn.setVisibility(View.GONE);
+				finishBtn.setVisibility(View.VISIBLE);
+			}
+		});
+
+
 	}
+
+
+	private class doit extends AsyncTask<Void, Void, Integer>
+	{
+
+
+		private ProgressDialog Dialog = new ProgressDialog(DisplayQRActivity.this);
+
+		@Override
+		protected void onPreExecute()
+		{
+			Dialog.setMessage("Loading please wait ...");
+			Dialog.show();
+
+		}
+
+		@Override
+		protected Integer doInBackground(Void... params)
+		{
+			// receive filepath msg here
+			Intent intent = getIntent();
+			message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+			int flag=intent.getFlags();
+			String messagebyte = null;
+
+			try {
+				// decode if received flag = 0 decode file
+				if (flag==0)
+					messagebyte = decodefile(message);
+
+
+					// decode if received flag = 1 decode image
+				else if (flag==1)
+					messagebyte = decodeimage(message);
+			} catch (IOException e1) {
+				// Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			// encoding to multiplexed here.
+			try {
+
+				encodeqr(messagebyte);
+
+			} catch (WriterException e) {
+
+				e.printStackTrace();
+			}
+
+
+			return 0;
+		}
+
+		@Override
+		protected void onPostExecute(Integer result)
+		{
+
+			ImageView img;
+			Message msg = new Message();
+			if(result==0)
+			{
+				// animate the calculated qr code
+				img = (ImageView) findViewById(R.id.qrCode1);
+				img.setBackgroundDrawable(animDrawable);
+				Handler startAnimation = new Handler() {
+					public void handleMessage(Message msg) {
+						super.handleMessage(msg);
+						animDrawable.start();
+					}
+				};
+				startAnimation.sendMessage(msg);
+			}
+			// after completed finished the progressbar
+			Dialog.dismiss();
+		}
+	}
+
 
 	// TODO : note that only file is working so far.
 	// TODO : decode for image as well
-	public void startEncoding(View view){
 
-		// receive filepath msg here
-		Intent intent = getIntent();
-		message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
-		int flag=intent.getFlags();
-		String messagebyte = null;
 
-		try {
-			// decode if received flag = 0 decode file
-			if (flag==0)
-				messagebyte = decodefile(message);
 
-				// decode if received flag = 1 decode image
-			else if (flag==1)
-				messagebyte = decodeimage(message);
-		} catch (IOException e1) {
-			// Auto-generated catch block
-			e1.printStackTrace();
-		}
 
-		// encoding to multiplexed here.
-		try {
-
-			encodeqr(messagebyte);
-
-		} catch (WriterException e) {
-
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-
-			// this call the encoding function again
-			//startEncoding();
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
 
 	// decode the selected file path to here to messagebyte for encoding
 	private String decodefile(String FilePath) throws IOException{
-		
+
+
 		File file = new File(FilePath);
 		FileInputStream fis = new FileInputStream(file);
 
@@ -174,6 +222,7 @@ public class DisplayQRActivity extends Activity {
 	// MAIN ENCODING METHOD HERE
 	@SuppressWarnings("deprecation")
 	private void encodeqr(String b) throws WriterException{
+
 
 		DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);  
@@ -228,17 +277,7 @@ public class DisplayQRActivity extends Activity {
 		// this will be the ending flag QR code shown
 		performStart(repeated,0);
 
-		// animate the calculated qr code
-		ImageView img = (ImageView) findViewById(R.id.qrCode1);
-		img.setBackgroundDrawable(animDrawable);
-		Handler startAnimation = new Handler() {
-			  public void handleMessage(Message msg) {
-			    super.handleMessage(msg);
-			    animDrawable.start();
-			  }
-			};
-		Message msg = new Message();
-		startAnimation.sendMessage(msg);
+
 	}
 
 	// this method generate the start QR code image.
