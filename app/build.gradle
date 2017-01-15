@@ -31,4 +31,5 @@ dependencies {
     compile project(':libraries:libs:opencv')
     compile files('/Users/Weijun/Desktop/FYP/Android/MultiplexedQr/libraries/libs/javase-3.1.1-20150211.225955-15.jar')
     compile 'com.journeyapps:zxing-android-embedded:3.3.0'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }

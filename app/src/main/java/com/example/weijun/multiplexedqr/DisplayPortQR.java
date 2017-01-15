@@ -419,6 +419,8 @@ public class DisplayPortQR extends Activity {
 
     }
 
+
+
     private String checkframe(Bitmap pic){
         Result result = null;
         int width1 = pic.getWidth(), height1 = pic.getHeight();
