@@ -12,5 +12,7 @@
     <string name="title_activity_take_qrcode">TakeQRCode</string>
     <string name="title_activity_receiver_view">ReceiverView</string>
     <string name="title_activity_receiver_input_view">ReceiverInputView</string>
+    <string name="back">Back</string>
+    <string name="okay">Ok</string>
 
 </resources>

@@ -22,8 +22,10 @@ import com.google.zxing.WriterException;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
@@ -105,6 +107,25 @@ public class DisplayQRActivity extends Activity {
 		SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 		pwdCode = sharedPrefer.getString("pwdcode", "");
 
+		// ensure passcode is initialized before encoding
+		if(pwdCode=="" | pwdCode==null) {
+
+			new AlertDialog.Builder(this)
+					.setTitle("Empty Passcode")
+					.setMessage("Please ensure passcode is set.")
+					.setPositiveButton(R.string.back, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// go back to main page
+							Intent intent = new Intent(DisplayQRActivity.this, MainActivity.class);
+							startActivity(intent);
+							finish();
+						}
+					})
+					.setIcon(android.R.drawable.ic_dialog_alert)
+					.show();
+
+		}
+
 		// status text
 		lblTxt = (TextView) findViewById(R.id.lbl_text);
 
@@ -132,7 +153,7 @@ public class DisplayQRActivity extends Activity {
 			public void onClick(View v) {
 
 				readyBtn.setVisibility(View.GONE);
-				new CountDownTimer(2000, 1000) {
+				new CountDownTimer(5000, 1000) {
 
 					public void onTick(long millisUntilFinished) {
 						lblTxt.setText("STARTING IN: " + millisUntilFinished / 1000);
@@ -284,13 +305,13 @@ public class DisplayQRActivity extends Activity {
 			try {
 
 				// encode the start passcode first
-				encodeqr(pwdCode);
+			//	encodeqr(pwdCode);
 
 				// display multiplexed
 				encodeqr(messagebyte);
 
 				// encode the end passcode
-				encodeqr(pwdCode);
+			//	encodeqr(pwdCode);
 
 
 
@@ -378,17 +399,20 @@ public class DisplayQRActivity extends Activity {
 		bitmap1 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		bitmap2 = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
 
+		//String repeated = new String(new char[100]).replace("\0", "0");
+	//	Log.d("REPEATED","String is : \n" + repeated);
 
-		String repeated = new String(new char[100]).replace("\0", "0");
+		// this will be the starting flag QR code shown first (passcode)
+		performStart(pwdCode, 0);
 
-		// this will be the starting flag QR code shown first
-		performStart(repeated, 0);
 
 		int j = 0;
 		int x = 0;
 
 		while (true) {
 			j++;
+
+			// max 500 characters
 			if (strParse.length() / (j * 3) <= 500) {
 				x = j;
 				break;
@@ -399,6 +423,8 @@ public class DisplayQRActivity extends Activity {
 		while (i < strParse.length()) {
 			i += ((strParse.length() / (x * 3)) + 1);
 			sb = (strParse.substring(i, Math.min((i + strParse.length() / (x * 3)) + 1, strParse.length())));
+
+			// checksum CRC32 - Frame Number --> 2 characters, checksum --> 11, string length --> 3 (since max is 500 characters in one frame)
 			checksumstr = String.format("%1$2s", frameno) + String.format("%1$11s", String.valueOf(checksum(sb))) + sb + String.format("%1$3s", sb.length());
 			Log.d("checksum_string", checksumstr + " | " + colorcode + "\n");
 
@@ -416,8 +442,9 @@ public class DisplayQRActivity extends Activity {
 				break;
 		}
 
-		// this will be the ending flag QR code shown
-		performStart(repeated, 0);
+		// this will be the ending flag QR code shown (passcode)
+		performStart(pwdCode, 0);
+
 		// after completed finished the progressbar
 
 	}
@@ -455,7 +482,7 @@ public class DisplayQRActivity extends Activity {
 		Canvas canvas = new Canvas(draw);
 		canvas.drawBitmap(bitmap2, new Matrix(), new Paint());
 		frame1.draw(canvas);
-		animDrawable.addFrame(frame1, 2000); // set frame flash every 2.5 seconds
+		animDrawable.addFrame(frame1, 5000); // set frame flash every 5 seconds
 		bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		bitmap1 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 	}

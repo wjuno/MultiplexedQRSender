@@ -130,24 +130,27 @@ public class MainActivity extends Activity {
 		mQRbtn = (Button) findViewById(R.id.btn_takeQR);
 		mQRbtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
+				// call DisplayQRActivity to convert to multiplexed QR
+				Intent intent = new Intent(MainActivity.this, EnterPasscode.class);
+				startActivity(intent);
 
-				try {
-
-					IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
-					integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
-					integrator.setPrompt("Scan a QR code");
-					integrator.setOrientationLocked(false);
-					integrator.setCameraId(0);  // Use a specific camera of the device
-					integrator.setBeepEnabled(false);
-					integrator.initiateScan();
-
-
-				// Get the results:
-				} catch (Exception e) {
-					Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-					Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
-					startActivity(marketIntent);
-				}
+//				try {
+//
+//					IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
+//					integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+//					integrator.setPrompt("Scan a QR code");
+//					integrator.setOrientationLocked(false);
+//					integrator.setCameraId(0);  // Use a specific camera of the device
+//					integrator.setBeepEnabled(false);
+//					integrator.initiateScan();
+//
+//
+//				// Get the results:
+//				} catch (Exception e) {
+//					Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+//					Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+//					startActivity(marketIntent);
+//				}
 			}
 		});
 

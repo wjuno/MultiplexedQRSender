@@ -12,10 +12,10 @@
     <!-- permission -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.RECORD_VIDEO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
@@ -44,17 +44,23 @@
             android:label="@string/title_activity_display_port_qr" />
         <activity
             android:name=".MutualPasscode"
-            android:label="@string/title_activity_mutual_passcode"></activity>
+            android:label="@string/title_activity_mutual_passcode" />
         <activity
             android:name=".ReceiverView"
             android:label="@string/title_activity_receiver_view" />
         <activity
             android:name=".ReceiverInputView"
-            android:label="@string/title_activity_receiver_input_view" /><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+            android:label="@string/title_activity_receiver_input_view" />
+        <!--
+ ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
+        -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".EnterPasscode" />
+        <activity android:name=".VideoDemo"></activity>
     </application>
 
 </manifest>
