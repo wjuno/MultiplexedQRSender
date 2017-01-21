@@ -3,6 +3,7 @@ package com.example.weijun.multiplexedqr;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.media.Image;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
@@ -43,6 +45,7 @@ import com.google.zxing.Reader;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.ResultPoint;
+import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
@@ -65,9 +68,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -207,6 +214,160 @@ public class EnterPasscode extends Activity {
     }
 
 
+    private class doit extends AsyncTask<Uri, Void, Integer> {
+        private ProgressDialog Dialog = new ProgressDialog(EnterPasscode.this);
+        boolean passframe = false;
+        String qrText,qrText2,qrText3, fullString = "";
+
+        // use hashset to remove any duplicates
+        Set<String> noDup = new HashSet<String>();
+
+
+        @Override
+        protected void onPreExecute() {
+            Dialog.setMessage("Loading please wait ...");
+            Dialog.show();
+        }
+
+        @Override
+        protected Integer doInBackground(Uri... uris) {
+            try {
+
+                MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(EnterPasscode.this,uris[0]);
+                String time = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                int videoDur = Integer.parseInt(time) * 1000;// This will give the total video time in microsecond
+                Log.d("Duration","Time is : " +  videoDur);
+
+
+                // TODO: Do decode passcode algo here
+                // TODO: Finally convert this algo to do it in the background
+
+                // initialization start time
+                int vidInit = 0;
+
+                while (vidInit < videoDur){
+
+                    // Test : 6 microsecond = multiplexed
+                    Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
+
+                    // Adjust the frame to make sure rotate to the correct position
+                    if (bmFrame.getWidth() > bmFrame.getHeight()) {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        bmFrame = Bitmap.createBitmap(bmFrame, 0, 0, bmFrame.getWidth(), bmFrame.getHeight(), matrix, true);
+                    }
+
+                    // Setting the frame sizes for displaying (Testing purpose)
+                    bmFrame = Bitmap.createScaledBitmap(bmFrame, 500, 800, false);
+
+                    // Decode qr code
+                    qrText = checkframe(decodeqrRed(bmFrame));
+                    Log.d("FrameString","String is : " +  qrText);
+
+                    if(qrText!=null){
+                        if(qrText.equals(userPass)){
+                            // Pass
+                            // Call check multiplexed qr method
+                            // Exit Loop
+                            Log.d("passcode","passcode1 pass");
+                            Log.d("passcode","passcode2 pass");
+                            Log.d("vidDur", ": " + vidInit);
+                            passframe = true;
+                            break;
+                        }else if(vidInit >= videoDur/2){
+                            Log.d("passcode","FAIL RETRY");
+                            passframe = false;
+                            break;
+                        }
+                    }
+                    vidInit = vidInit + 500000;
+                }
+
+
+                if(passframe){
+                    while (vidInit <= videoDur) {
+                        Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
+
+                        // Adjust the frame to make sure rotate to the correct position
+                        if (bmFrame.getWidth() > bmFrame.getHeight()) {
+                            Matrix matrix = new Matrix();
+                            matrix.postRotate(90);
+                            bmFrame = Bitmap.createBitmap(bmFrame, 0, 0, bmFrame.getWidth(), bmFrame.getHeight(), matrix, true);
+                        }
+
+                        // Setting the frame sizes for displaying (Testing purpose)
+                        bmFrame = Bitmap.createScaledBitmap(bmFrame, 500, 800, false);
+
+                        // Decode qr code
+                        qrText = checkframe(decodeqrRed(bmFrame));
+                        Log.d("QRTEXT", "Red Content is : " + qrText);
+                        qrText2 = checkframe(decodeqrGreen(bmFrame));
+                        Log.d("QRTEXT", "Green Content is : " + qrText2);
+                        qrText3 = checkframe(decodeqrBlue(bmFrame));
+                        Log.d("QRTEXT", "Blue Content is : " + qrText3);
+
+                        // Make sure to check only the actual dataset
+                        if(!qrText.equals(userPass)) {
+                            noDup.add(decodeChecksum(qrText,qrText2,qrText3));
+                        }
+                        vidInit = vidInit + 500000;
+
+                        if(qrText.equals(userPass)){
+                            Log.d("QRTEXT","PASS!!!");
+                        }
+                    } // END WHILE
+
+                    TreeSet myTreeSet = new TreeSet();
+                    myTreeSet.addAll(noDup);
+                    System.out.println("FULLSTRING IS : ==> "+ myTreeSet.size());
+
+                    Iterator iterator;
+                    iterator = myTreeSet.iterator();
+
+                    // displaying the decoded set data (cleaning)
+                    System.out.print("Tree set data: ");
+                    while (iterator.hasNext()) {
+                        String mergeStr = iterator.next().toString();
+                        mergeStr = mergeStr.substring(2);
+                        System.out.print(mergeStr);
+                    }
+
+
+                }
+
+            } catch (Exception e) { // END MAIN TRY
+                Log.e("GUN", Log.getStackTraceString(e));
+
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            Dialog.dismiss();
+            if(passframe==false){
+                // Invalid passcode
+                new AlertDialog.Builder(EnterPasscode.this)
+                        .setTitle("Incorrect Passcode")
+                        .setMessage("Please ensure passcode is correct.")
+                        .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // go back to main page
+                                Intent intent = new Intent(EnterPasscode.this, EnterPasscode.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+        }
+    }
+
+
 
 
     @Override
@@ -219,8 +380,6 @@ public class EnterPasscode extends Activity {
             case CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE:
 
                 Bitmap frame = null;
-                boolean passframe = false;
-                String qrText,qrText2,qrText3 = "";
 
                 if (resultCode == RESULT_OK) {
 
@@ -234,116 +393,9 @@ public class EnterPasscode extends Activity {
                         marshMallowPermission.requestPermissionForExternalStorage();
                     }
 
-                    try {
+                    doit a = new doit();
+                    a.execute(videoUri);
 
-                        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                        mediaMetadataRetriever.setDataSource(this,videoUri);
-                        String time = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-                        int videoDur = Integer.parseInt(time) * 1000;// This will give the total video time in microsecond
-                        Log.d("Duration","Time is : " +  videoDur);
-
-
-                        // TODO: Do decode passcode algo here
-                        // TODO: Finally convert this algo to do it in the background
-
-                        // initialization start time
-                        int vidInit = 0;
-
-                        while (vidInit < videoDur){
-
-                            // Test : 6 microsecond = multiplexed
-                            Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
-
-                            // Adjust the frame to make sure rotate to the correct position
-                            if (bmFrame.getWidth() > bmFrame.getHeight()) {
-                                Matrix matrix = new Matrix();
-                                matrix.postRotate(90);
-                                bmFrame = Bitmap.createBitmap(bmFrame, 0, 0, bmFrame.getWidth(), bmFrame.getHeight(), matrix, true);
-                            }
-
-                            // Setting the frame sizes for displaying (Testing purpose)
-                            bmFrame = Bitmap.createScaledBitmap(bmFrame, 500, 800, false);
-
-                            // Decode qr code
-                            qrText = checkframe(decodeqrRed(bmFrame));
-                            Log.d("FrameString","String is : " +  qrText);
-
-                            if(qrText!=null){
-                                if(qrText.equals(userPass)){
-                                    // Pass
-                                    // Call check multiplexed qr method
-                                    // Exit Loop
-                                    Log.d("passcode","passcode1 pass");
-                                    Log.d("passcode","passcode2 pass");
-                                    Log.d("vidDur", ": " + vidInit);
-                                    passframe = true;
-                                    break;
-                                }else if(vidInit >= videoDur/2){
-
-                                    // Invalid passcode
-                                    new AlertDialog.Builder(this)
-                                            .setTitle("Incorrect Passcode")
-                                            .setMessage("Please ensure passcode is correct.")
-                                            .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    // go back to main page
-                                                    Intent intent = new Intent(EnterPasscode.this, EnterPasscode.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            })
-                                            .setIcon(android.R.drawable.ic_dialog_alert)
-                                            .show();
-
-                                    Log.d("passcode","FAIL RETRY");
-                                    passframe = false;
-                                    break;
-                                }
-                            }
-                            vidInit = vidInit + 500000;
-                        }
-
-
-                        if(passframe){
-                            while (vidInit <= videoDur) {
-                                Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
-
-                                // Adjust the frame to make sure rotate to the correct position
-                                if (bmFrame.getWidth() > bmFrame.getHeight()) {
-                                    Matrix matrix = new Matrix();
-                                    matrix.postRotate(90);
-                                    bmFrame = Bitmap.createBitmap(bmFrame, 0, 0, bmFrame.getWidth(), bmFrame.getHeight(), matrix, true);
-                                }
-
-                                // Setting the frame sizes for displaying (Testing purpose)
-                                bmFrame = Bitmap.createScaledBitmap(bmFrame, 500, 800, false);
-
-                                // Decode qr code
-                                qrText = checkframe(decodeqrRed(bmFrame));
-                                Log.d("QRTEXT", "Red Content is : " + qrText);
-                                qrText2 = checkframe(decodeqrGreen(bmFrame));
-                                Log.d("QRTEXT", "Green Content is : " + qrText2);
-                                qrText3 = checkframe(decodeqrBlue(bmFrame));
-                                Log.d("QRTEXT", "Blue Content is : " + qrText3);
-
-                                // Make sure to check only the actual dataset
-                                if(!qrText.equals(userPass)) {
-                                    decodeChecksum(qrText);
-                                    decodeChecksum(qrText2);
-                                    decodeChecksum(qrText3);
-                                }
-                                vidInit = vidInit + 500000;
-
-                                if(qrText.equals(userPass)){
-                                    Log.d("QRTEXT","PASS!!!");
-                                }
-                            }
-                        }
-
-                    } catch (Exception e) { // END MAIN TRY
-                        Log.e("GUN", Log.getStackTraceString(e));
-
-                    }
 
                     System.gc();
 
@@ -355,31 +407,47 @@ public class EnterPasscode extends Activity {
 
     }
 
-    private String decodeChecksum(String checksumStr){
+    private String decodeChecksum(String red, String green, String blue){
 
-        // Getting the first two characters representing the frame number.
-        String frameNo1 = checksumStr.substring(0,2);
-        String frameNo2 = checksumStr.substring(1,2);
-        if(isInteger(frameNo1) || isInteger(frameNo2)){
-            // dosomething
-        }
+//        // Getting the first two characters representing the frame number.
+//        String frameNo1 = checksumStr.substring(0,2);
+//        String frameNo2 = checksumStr.substring(1,2);
+//        int frame1 = Integer.parseInt(frameNo1);
+//        int frame2 = Integer.parseInt(frameNo2);
+//
+//        if(isInteger(frameNo1) || isInteger(frameNo2)){
+//            // dosomething
+//        }
+//
+//        // Extracting 11 characters checksum
+//        String checksum = checksumStr.substring(2,13);
+//
+//        // Extracting the last 3 characters - string length
+//        String strLeng = checksumStr.substring(checksumStr.length()-3);
 
-        // Extracting 11 characters checksum
-        String checksum = checksumStr.substring(2,13);
+        String r,g,b,fullString;
 
-        // Extracting the last 3 characters - string length
-        String strLeng = checksumStr.substring(checksumStr.length()-3);
+       // replaced = checksumStr.replace(checksumStr.substring(0,13), "");
+       // replaced = replaced.replace(replaced.substring(replaced.length()-3),"");
 
-        String replaced;
+        // TODO : Temporary use this for testing
+        r = red.replace(red.substring(2,13), "");
+        r = r.replace(r.substring(r.length()-3),"");
 
-        replaced = checksumStr.replace(checksumStr.substring(0,13), "");
-        replaced = replaced.replace(replaced.substring(replaced.length()-3),"");
-
-
-        Log.d("REPLACED","String is : " + replaced);
+        Log.d("REPLACED", r);
 
 
-        return "";
+        g = green.replace(green.substring(0,13), "");
+        g = g.replace(g.substring(g.length()-3),"");
+
+        b = blue.replace(blue.substring(0,13), "");
+        b = b.replace(b.substring(b.length()-3),"");
+
+        fullString = r + g + b;
+
+
+
+        return fullString;
     }
 
     public static boolean isInteger(String s) {
@@ -436,7 +504,6 @@ public class EnterPasscode extends Activity {
         canvas.drawBitmap(bmp2, new Matrix(), paint);
         return bmOverlay;
     }
-
 
 
 
