@@ -285,6 +285,7 @@ public class EnterPasscode extends Activity {
                 }
 
 
+                // only if pass validating then can proceed to decoding the rest of the file
                 if(passframe){
                     while (vidInit <= videoDur) {
                         Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
@@ -320,21 +321,32 @@ public class EnterPasscode extends Activity {
 
                     TreeSet myTreeSet = new TreeSet();
                     myTreeSet.addAll(noDup);
-                    System.out.println("FULLSTRING IS : ==> "+ myTreeSet.size());
-
                     Iterator iterator;
                     iterator = myTreeSet.iterator();
 
                     // displaying the decoded set data (cleaning)
                     System.out.print("Tree set data: ");
+                    String mergeStr = "";
                     while (iterator.hasNext()) {
-                        String mergeStr = iterator.next().toString();
-                        mergeStr = mergeStr.substring(2);
-                        System.out.print(mergeStr);
+                        mergeStr += iterator.next().toString().substring(2);
+                        System.out.print("++++ >> " +  mergeStr);
                     }
 
 
-                }
+                    // TODO : Saving to the Download Folder
+                    File file;
+                    FileOutputStream outputStream;
+                    try {
+                        file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "MyDev.txt");
+
+                        outputStream = new FileOutputStream(file);
+                        outputStream.write(mergeStr.getBytes());
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                } // END PASS
 
             } catch (Exception e) { // END MAIN TRY
                 Log.e("GUN", Log.getStackTraceString(e));

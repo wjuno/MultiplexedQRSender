@@ -108,7 +108,7 @@ public class DisplayQRActivity extends Activity {
 		pwdCode = sharedPrefer.getString("pwdcode", "");
 
 		// ensure passcode is initialized before encoding
-		if(pwdCode=="" | pwdCode==null) {
+		if(pwdCode=="" || pwdCode==null) {
 
 			new AlertDialog.Builder(this)
 					.setTitle("Empty Passcode")
