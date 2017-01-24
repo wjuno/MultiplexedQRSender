@@ -380,7 +380,7 @@ public class DisplayQRActivity extends Activity {
 
 	}
 
-
+	// TODO : decide to remove video after encoding or keep it.
 	// MAIN ENCODING METHOD HERE
 	@SuppressWarnings("deprecation")
 	private void encodeqr(String strParse) throws WriterException {

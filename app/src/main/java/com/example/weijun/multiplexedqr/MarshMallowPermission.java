@@ -73,6 +73,7 @@ public class MarshMallowPermission {
         }
     }
 
+
     public void requestPermissionForCamera(){
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)){
             Toast.makeText(activity, "Camera permission needed. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();

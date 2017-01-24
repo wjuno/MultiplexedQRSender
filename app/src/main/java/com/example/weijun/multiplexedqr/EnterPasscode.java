@@ -3,7 +3,9 @@ package com.example.weijun.multiplexedqr;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -72,6 +75,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -83,6 +87,7 @@ import java.util.zip.Checksum;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 import static android.content.ContentValues.TAG;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class EnterPasscode extends Activity {
 
@@ -98,8 +103,8 @@ public class EnterPasscode extends Activity {
     private static final int CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE = 200;
 
     EditText edt_pwd;
-    Button btn_camera;
-    ImageView video_thumb;
+    Button btn_camera,btn_openFile;
+    //ImageView video_thumb;
 
     String userPass;
     int flag;
@@ -111,7 +116,8 @@ public class EnterPasscode extends Activity {
 
         edt_pwd = (EditText)findViewById(R.id.edt_userPwd);
         btn_camera = (Button)findViewById(R.id.btn_camera);
-        video_thumb = (ImageView)findViewById(R.id.imageView_bitMap);
+        btn_openFile = (Button)findViewById(R.id.btn_openFile);
+        //video_thumb = (ImageView)findViewById(R.id.imageView_bitMap);
 
     }
 
@@ -129,14 +135,31 @@ public class EnterPasscode extends Activity {
             }
         });
 
+
+        btn_openFile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                // TODO Open the Downloads Folder
+                Intent intent = new Intent();
+                Uri pathUri= Uri.parse(Environment.getExternalStorageDirectory().getPath()
+                        + "/Download/");
+                intent.setDataAndType(pathUri, "file/*");
+                startActivity(intent);
+
+
+            }
+        });
+
     }
+
+
 
     @SuppressLint("SimpleDateFormat")
     private File getOutputMediaFile(int type){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        File mediaStorageDir = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
 
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
@@ -241,8 +264,6 @@ public class EnterPasscode extends Activity {
 
 
                 // TODO: Do decode passcode algo here
-                // TODO: Finally convert this algo to do it in the background
-
                 // initialization start time
                 int vidInit = 0;
 
@@ -302,13 +323,13 @@ public class EnterPasscode extends Activity {
 
                         // Decode qr code
                         qrText = checkframe(decodeqrRed(bmFrame));
-                        Log.d("QRTEXT", "Red Content is : " + qrText);
+                       // Log.d("QRTEXT", "Red Content is : " + qrText);
                         qrText2 = checkframe(decodeqrGreen(bmFrame));
-                        Log.d("QRTEXT", "Green Content is : " + qrText2);
+                       // Log.d("QRTEXT", "Green Content is : " + qrText2);
                         qrText3 = checkframe(decodeqrBlue(bmFrame));
-                        Log.d("QRTEXT", "Blue Content is : " + qrText3);
+                       // Log.d("QRTEXT", "Blue Content is : " + qrText3);
 
-                        // Make sure to check only the actual dataset
+                        // Make sure to check only the actual dataset (remove duplicates using hashset)
                         if(!qrText.equals(userPass)) {
                             noDup.add(decodeChecksum(qrText,qrText2,qrText3));
                         }
@@ -319,6 +340,7 @@ public class EnterPasscode extends Activity {
                         }
                     } // END WHILE
 
+                    // Then we use treeset to do order sets into increasing order (Sorting)
                     TreeSet myTreeSet = new TreeSet();
                     myTreeSet.addAll(noDup);
                     Iterator iterator;
@@ -329,19 +351,26 @@ public class EnterPasscode extends Activity {
                     String mergeStr = "";
                     while (iterator.hasNext()) {
                         mergeStr += iterator.next().toString().substring(2);
-                        System.out.print("++++ >> " +  mergeStr);
+                      //  System.out.print("++++ >> " +  mergeStr);
                     }
 
 
-                    // TODO : Saving to the Download Folder
                     File file;
                     FileOutputStream outputStream;
+
                     try {
-                        file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "MyDev.txt");
+                        String filename = "QRCode_" + (new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())).format(new Date()) + ".txt";
+                        file = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
 
                         outputStream = new FileOutputStream(file);
                         outputStream.write(mergeStr.getBytes());
                         outputStream.close();
+
+                        // open file from download folder
+                        File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                        FileOpen.openFile(EnterPasscode.this, myFile);
+
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -355,6 +384,8 @@ public class EnterPasscode extends Activity {
 
             return null;
         }
+
+
 
 
         @Override
@@ -405,9 +436,9 @@ public class EnterPasscode extends Activity {
                         marshMallowPermission.requestPermissionForExternalStorage();
                     }
 
+                    // Perform the async task (main decoding)
                     doit a = new doit();
                     a.execute(videoUri);
-
 
                     System.gc();
 
@@ -421,33 +452,11 @@ public class EnterPasscode extends Activity {
 
     private String decodeChecksum(String red, String green, String blue){
 
-//        // Getting the first two characters representing the frame number.
-//        String frameNo1 = checksumStr.substring(0,2);
-//        String frameNo2 = checksumStr.substring(1,2);
-//        int frame1 = Integer.parseInt(frameNo1);
-//        int frame2 = Integer.parseInt(frameNo2);
-//
-//        if(isInteger(frameNo1) || isInteger(frameNo2)){
-//            // dosomething
-//        }
-//
-//        // Extracting 11 characters checksum
-//        String checksum = checksumStr.substring(2,13);
-//
-//        // Extracting the last 3 characters - string length
-//        String strLeng = checksumStr.substring(checksumStr.length()-3);
-
         String r,g,b,fullString;
 
-       // replaced = checksumStr.replace(checksumStr.substring(0,13), "");
-       // replaced = replaced.replace(replaced.substring(replaced.length()-3),"");
-
-        // TODO : Temporary use this for testing
+        // Show the red frame number only as the header # of the frame (for sorting purposes)
         r = red.replace(red.substring(2,13), "");
         r = r.replace(r.substring(r.length()-3),"");
-
-        Log.d("REPLACED", r);
-
 
         g = green.replace(green.substring(0,13), "");
         g = g.replace(g.substring(g.length()-3),"");
@@ -455,24 +464,12 @@ public class EnterPasscode extends Activity {
         b = blue.replace(blue.substring(0,13), "");
         b = b.replace(b.substring(b.length()-3),"");
 
+        // merge all the rgb frames together
         fullString = r + g + b;
-
-
 
         return fullString;
     }
 
-    public static boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-        } catch(NumberFormatException e) {
-            return false;
-        } catch(NullPointerException e) {
-            return false;
-        }
-        // only got here if we didn't return false
-        return true;
-    }
 
     private String checkframe(Bitmap pic){
         Result result = null;

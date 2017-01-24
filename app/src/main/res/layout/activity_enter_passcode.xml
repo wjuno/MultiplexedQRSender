@@ -38,14 +38,14 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true">
 
-        <ImageView
+        <Button
+            android:text="Open File"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@color/accent"
-            android:id="@+id/imageView_bitMap"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
-
+            android:id="@+id/btn_openFile"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            />
         <Button
             android:text="Submit"
             android:layout_width="wrap_content"
