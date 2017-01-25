@@ -41,36 +41,36 @@
 
         </LinearLayout>
 
-        <TextView
-            android:text="Device ID"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv_connection" />
+        <!--<TextView-->
+            <!--android:text="Device ID"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/tv_connection" />-->
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:ems="10"
-            android:id="@+id/et_connection"
-            android:hint="Enter connection" />
+        <!--<EditText-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:inputType="none"-->
+            <!--android:ems="10"-->
+            <!--android:id="@+id/et_connection"-->
+            <!--android:hint="Enter connection" />-->
 
-        <Button
-            android:text="Save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_saveConnection" />
+        <!--<Button-->
+            <!--android:text="Save"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/btn_saveConnection" />-->
 
-        <Button
-            android:text="Display"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_displayConn" />
+        <!--<Button-->
+            <!--android:text="Display"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/btn_displayConn" />-->
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv_display" />
+        <!--<TextView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/tv_display" />-->
 
 
 </LinearLayout>

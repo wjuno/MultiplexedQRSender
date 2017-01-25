@@ -1,55 +1,39 @@
 package com.example.weijun.multiplexedqr;
 
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.media.Image;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
 import com.google.zxing.LuminanceSource;
-import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.RGBLuminanceSource;
-import com.google.zxing.Reader;
-import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
-import com.google.zxing.ResultPoint;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 
@@ -58,36 +42,25 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 
-
-import wseemann.media.FFmpegMediaMetadataRetriever;
-
-import static android.content.ContentValues.TAG;
-import static android.os.Environment.getExternalStoragePublicDirectory;
+import static android.os.Environment.getExternalStorageDirectory;
 
 public class EnterPasscode extends Activity {
 
@@ -104,7 +77,7 @@ public class EnterPasscode extends Activity {
 
     EditText edt_pwd;
     Button btn_camera,btn_openFile;
-    //ImageView video_thumb;
+
 
     String userPass;
     int flag;
@@ -117,7 +90,6 @@ public class EnterPasscode extends Activity {
         edt_pwd = (EditText)findViewById(R.id.edt_userPwd);
         btn_camera = (Button)findViewById(R.id.btn_camera);
         btn_openFile = (Button)findViewById(R.id.btn_openFile);
-        //video_thumb = (ImageView)findViewById(R.id.imageView_bitMap);
 
     }
 
@@ -142,7 +114,7 @@ public class EnterPasscode extends Activity {
                 // TODO Open the Downloads Folder
                 Intent intent = new Intent();
                 Uri pathUri= Uri.parse(Environment.getExternalStorageDirectory().getPath()
-                        + "/Download/");
+                        + "/MultiplexedQR/");
                 intent.setDataAndType(pathUri, "file/*");
                 startActivity(intent);
 
@@ -153,41 +125,41 @@ public class EnterPasscode extends Activity {
     }
 
 
-
-    @SuppressLint("SimpleDateFormat")
-    private File getOutputMediaFile(int type){
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
-
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss.SSS").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-            fileNames.add(mediaFile);
-
-        } else if(type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-        return mediaFile;
-    }
+//
+//    @SuppressLint("SimpleDateFormat")
+//    private File getOutputMediaFile(int type){
+//        // To be safe, you should check that the SDCard is mounted
+//        // using Environment.getExternalStorageState() before doing this.
+//
+//        File mediaStorageDir = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
+//
+//        // This location works best if you want the created images to be shared
+//        // between applications and persist after your app has been uninstalled.
+//
+//        // Create the storage directory if it does not exist
+//        if (! mediaStorageDir.exists()){
+//            if (! mediaStorageDir.mkdirs()){
+//                Log.d("MyCameraApp", "failed to create directory");
+//                return null;
+//            }
+//        }
+//
+//        // Create a media file name
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss.SSS").format(new Date());
+//        File mediaFile;
+//        if (type == MEDIA_TYPE_IMAGE){
+//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+//                    "IMG_"+ timeStamp + ".jpg");
+//            fileNames.add(mediaFile);
+//
+//        } else if(type == MEDIA_TYPE_VIDEO) {
+//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+//                    "VID_"+ timeStamp + ".mp4");
+//        } else {
+//            return null;
+//        }
+//        return mediaFile;
+//    }
 
     public void recordQRCode(){
 
@@ -199,12 +171,12 @@ public class EnterPasscode extends Activity {
         }
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
-
-        // create a file to save the video
-        fileUri = getOutputMediaFile(MEDIA_TYPE_VIDEO);
-
-        // set the image file name
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+//
+//        // create a file to save the video
+//        fileUri = getOutputMediaFile(MEDIA_TYPE_VIDEO);
+//
+//        // set the image file name
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
 
         // set the video image quality to high
         intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
@@ -217,26 +189,7 @@ public class EnterPasscode extends Activity {
 
 
 
-    // Getting screenshot from the video
-    public static Bitmap getVideoFrame(Context context, Uri uri) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        try {
-            retriever.setDataSource(uri.toString(), new HashMap<String, String>());
-            return retriever.getFrameAtTime();
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-        } catch (RuntimeException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                retriever.release();
-            } catch (RuntimeException ex) {
-            }
-        }
-        return null;
-    }
-
-
+    // AsyncTask
     private class doit extends AsyncTask<Uri, Void, Integer> {
         private ProgressDialog Dialog = new ProgressDialog(EnterPasscode.this);
         boolean passframe = false;
@@ -246,8 +199,10 @@ public class EnterPasscode extends Activity {
         Set<String> noDup = new HashSet<String>();
 
 
+        // TODO : Problem with Android Lollipop Dialog
         @Override
         protected void onPreExecute() {
+            super.onPreExecute();
             Dialog.setMessage("Loading please wait ...");
             Dialog.show();
         }
@@ -351,24 +306,44 @@ public class EnterPasscode extends Activity {
                     String mergeStr = "";
                     while (iterator.hasNext()) {
                         mergeStr += iterator.next().toString().substring(2);
-                      //  System.out.print("++++ >> " +  mergeStr);
-                    }
 
+                    }
 
                     File file;
                     FileOutputStream outputStream;
 
                     try {
+                        // TODO need to save into another created folder
+
                         String filename = "QRCode_" + (new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())).format(new Date()) + ".txt";
-                        file = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
+                        File folder = new File(Environment.getExternalStorageDirectory() +
+                                File.separator + "MultiplexedQR");
+                        boolean success = true;
+                        if (!folder.exists()) {
+                            success = folder.mkdirs();
+                        }
+                        if (success) {
+                            // Do something on success
+                            file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
+                            outputStream = new FileOutputStream(file);
+                            outputStream.write(mergeStr.getBytes());
+                            outputStream.close();
 
-                        outputStream = new FileOutputStream(file);
-                        outputStream.write(mergeStr.getBytes());
-                        outputStream.close();
+                            // open file from download folder
+                            File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                            FileOpen.openFile(EnterPasscode.this, myFile);
+                        } else {
+                            // Do something else on failure
+                            // Do something on success
+                            file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
+                            outputStream = new FileOutputStream(file);
+                            outputStream.write(mergeStr.getBytes());
+                            outputStream.close();
 
-                        // open file from download folder
-                        File myFile = new File(String.valueOf(file.getAbsoluteFile()));
-                        FileOpen.openFile(EnterPasscode.this, myFile);
+                            // open file from download folder
+                            File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                            FileOpen.openFile(EnterPasscode.this, myFile);
+                        }
 
 
                     } catch (IOException e) {
@@ -390,11 +365,15 @@ public class EnterPasscode extends Activity {
 
         @Override
         protected void onPostExecute(Integer result) {
-            Dialog.dismiss();
+
+            if(Dialog != null && Dialog.isShowing()){
+                Dialog.dismiss();
+            }
+
             if(passframe==false){
                 // Invalid passcode
-                new AlertDialog.Builder(EnterPasscode.this)
-                        .setTitle("Incorrect Passcode")
+                AlertDialog.Builder adb = new AlertDialog.Builder(EnterPasscode.this);
+                adb.setTitle("Incorrect Passcode")
                         .setMessage("Please ensure passcode is correct.")
                         .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -402,6 +381,7 @@ public class EnterPasscode extends Activity {
                                 Intent intent = new Intent(EnterPasscode.this, EnterPasscode.class);
                                 startActivity(intent);
                                 finish();
+                                dialog.dismiss();
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -422,23 +402,22 @@ public class EnterPasscode extends Activity {
 
             case CAPTURE_VIDEO_ACTIVITY_REQUEST_CODE:
 
-                Bitmap frame = null;
 
                 if (resultCode == RESULT_OK) {
 
+
                     // get user permission first
-                    //Uri videoUri = data.getData();
+                    Uri videoUri = data.getData();
 
                     // use this video as test first.
-                    Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.qr_multiplex);
+                    //Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.qr_multiplex);
 
                     if (!marshMallowPermission.checkPermissionForExternalStorage()) {
                         marshMallowPermission.requestPermissionForExternalStorage();
                     }
 
                     // Perform the async task (main decoding)
-                    doit a = new doit();
-                    a.execute(videoUri);
+                   new doit().execute(videoUri);
 
                     System.gc();
 
@@ -452,16 +431,24 @@ public class EnterPasscode extends Activity {
 
     private String decodeChecksum(String red, String green, String blue){
 
-        String r,g,b,fullString;
+        String r = "",g = "",b = "",fullString = "";
 
         // Show the red frame number only as the header # of the frame (for sorting purposes)
-        r = red.replace(red.substring(2,13), "");
+        if (red.substring(2,13)!=null) {
+            r = red.replace(red.substring(2, 13), "");
+
+        }else{
+            r = red.replace(red.substring(1,13),"");
+        }
+
         r = r.replace(r.substring(r.length()-3),"");
 
-        g = green.replace(green.substring(0,13), "");
-        g = g.replace(g.substring(g.length()-3),"");
+        if(green.length()>13||blue.length()>13){
+            g = green.replace(green.substring(0,13), "");
+            b = blue.replace(blue.substring(0,13), "");
+        }
 
-        b = blue.replace(blue.substring(0,13), "");
+        g = g.replace(g.substring(g.length()-3),"");
         b = b.replace(b.substring(b.length()-3),"");
 
         // merge all the rgb frames together

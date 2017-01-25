@@ -102,30 +102,6 @@ public class DisplayQRActivity extends Activity {
 
 
 
-
-		// retrieving passcode set by user from SharedPreferences
-		SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-		pwdCode = sharedPrefer.getString("pwdcode", "");
-
-		// ensure passcode is initialized before encoding
-		if(pwdCode=="" || pwdCode==null) {
-
-			new AlertDialog.Builder(this)
-					.setTitle("Empty Passcode")
-					.setMessage("Please ensure passcode is set.")
-					.setPositiveButton(R.string.back, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							// go back to main page
-							Intent intent = new Intent(DisplayQRActivity.this, MainActivity.class);
-							startActivity(intent);
-							finish();
-						}
-					})
-					.setIcon(android.R.drawable.ic_dialog_alert)
-					.show();
-
-		}
-
 		// status text
 		lblTxt = (TextView) findViewById(R.id.lbl_text);
 
@@ -249,7 +225,32 @@ public class DisplayQRActivity extends Activity {
 	@Override
 	public void onStart() {
 		super.onStart();
+		// retrieving passcode set by user from SharedPreferences
+		SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+		pwdCode = sharedPrefer.getString("pwdcode", "");
 
+		// TODO : Use custom dialog instead
+		// ensure passcode is initialized before encoding
+		if(pwdCode.equals("") || pwdCode.equals(null)) {
+
+
+			AlertDialog.Builder adb = new AlertDialog.Builder(DisplayQRActivity.this);
+			adb.setTitle("Empty Passcode")
+					.setMessage("Please ensure passcode is set.")
+					.setPositiveButton(R.string.back, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// current activity
+							DisplayQRActivity.this.finish();
+						}
+					});
+
+			// create alert dialog
+			AlertDialog alertDialog = adb.create();
+
+			// show it
+			alertDialog.show();
+
+		}
 
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -274,6 +275,7 @@ public class DisplayQRActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
+			super.onPreExecute();
 			Dialog.setMessage("Loading please wait ...");
 			Dialog.show();
 		}
@@ -328,7 +330,6 @@ public class DisplayQRActivity extends Activity {
 
 			// ready to execute anytime.
 			readyBtn.setVisibility(View.VISIBLE);
-
 			Dialog.dismiss();
 		}
 	}
@@ -337,8 +338,6 @@ public class DisplayQRActivity extends Activity {
 
 	// TODO : note that only file is working so far.
 	// TODO : decode for image as well
-
-
 
 	// decode the selected file path to here to messagebyte for encoding
 	private String decodefile(String FilePath) throws IOException {
@@ -380,7 +379,6 @@ public class DisplayQRActivity extends Activity {
 
 	}
 
-	// TODO : decide to remove video after encoding or keep it.
 	// MAIN ENCODING METHOD HERE
 	@SuppressWarnings("deprecation")
 	private void encodeqr(String strParse) throws WriterException {

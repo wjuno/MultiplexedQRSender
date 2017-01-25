@@ -6,8 +6,8 @@
 
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="Restart"
+        android:orderInCategory="1"
+        android:title="Enter Connection"
         app:showAsAction="never" />
 
     

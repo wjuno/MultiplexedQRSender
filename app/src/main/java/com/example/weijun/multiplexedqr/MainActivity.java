@@ -8,6 +8,7 @@ import org.opencv.android.OpenCVLoader;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import android.support.v4.app.ActivityCompat;
 
 
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -39,10 +42,6 @@ import com.google.zxing.integration.android.IntentResult;
 import java.io.File;
 
 
-// TODO : Remove directory menu
-// TODO : Remove validation, prompt user to enter mutual passcode to receive object
-// TODO : Resolve bug during decoding
-// TODO : Enable start signal and end signal for sending
 
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
@@ -98,14 +97,70 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		verifyStoragePermissions(this);
-		// Initialize TextView, EditText and Button
-		tv1 = (TextView)findViewById(R.id.tv_display);
-		ed1 = (EditText)findViewById(R.id.et_connection);
+//		// Initialize TextView, EditText and Button
+		// todo : Temporary
+//		tv1 = (TextView)findViewById(R.id.tv_display);
+//		ed1 = (EditText)findViewById(R.id.et_connection);
 
 
 		if (!OpenCVLoader.initDebug()) {
 			// Handle initialization error
 		}
+	}
+
+	public  boolean onCreateOptionsMenu(Menu menu){
+
+		// Inflate the menu; this adds items to the action bar if it is present
+		getMenuInflater().inflate(R.menu.main,menu);
+		return true;
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item){
+
+		int id = item.getItemId();
+
+		if(id == R.id.action_settings){
+
+			// Custom Dialog
+			AlertDialog.Builder mBuilder = new AlertDialog.Builder(MainActivity.this);
+			View mView = getLayoutInflater().inflate(R.layout.dialog_setting, null);
+			tv1 = (TextView) mView.findViewById(R.id.tv_display);
+			ed1 = (EditText) mView.findViewById(R.id.et_connection);
+
+			// Saving passcode
+			btn1 = (Button) mView.findViewById(R.id.btn_saveConnection);
+			btn1.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					// setting share preference (initializing)
+					SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+
+					// storing whatever text into sp
+					SharedPreferences.Editor editor = sharedPrefer.edit();
+					editor.putString("pwdcode", ed1.getText().toString());
+					editor.apply();
+					Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG).show();
+				}
+			});
+
+			// Displaying passcode
+			btn2 = (Button) mView.findViewById(R.id.btn_displayConn);
+			btn2.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+
+					// retrieving passcode else is a empty string
+					String pwd = sharedPrefer.getString("pwdcode", "");
+					tv1.setText(pwd);
+				}
+			});
+
+			mBuilder.setView(mView);
+			AlertDialog dialog = mBuilder.create();
+			dialog.show();
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -154,32 +209,6 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		// Saving passcode
-		btn1 = (Button)findViewById(R.id.btn_saveConnection);
-		btn1.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				// setting share preference (initializing)
-				SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-
-				// storing whatever text into sp
-				SharedPreferences.Editor editor = sharedPrefer.edit();
-				editor.putString("pwdcode", ed1.getText().toString());
-				editor.apply();
-				Toast.makeText(getApplicationContext(), "Saved!", Toast.LENGTH_LONG).show();
-			}
-		});
-
-		// Displaying passcode
-		btn2 = (Button)findViewById(R.id.btn_displayConn);
-		btn2.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				SharedPreferences sharedPrefer = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-
-				// retrieving passcode else is a empty string
-				String pwd = sharedPrefer.getString("pwdcode", "");
-				tv1.setText(pwd);
-			}
-		});
 
 	}
 
