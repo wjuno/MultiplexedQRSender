@@ -4,10 +4,14 @@ package com.example.weijun.multiplexedqr;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -25,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -61,10 +66,15 @@ import java.util.zip.Checksum;
 
 
 import static android.os.Environment.getExternalStorageDirectory;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class EnterPasscode extends Activity {
 
+    private AlertDialog dialog = null;
     private File fileUri;
+    Button btnFile,btnImg;
+    boolean imgF = false;
+
 
     MarshMallowPermission marshMallowPermission = new MarshMallowPermission(this);
 
@@ -124,44 +134,88 @@ public class EnterPasscode extends Activity {
 
     }
 
+    @Override
+    public void onPause(){
+        super.onPause();
 
-//
-//    @SuppressLint("SimpleDateFormat")
-//    private File getOutputMediaFile(int type){
-//        // To be safe, you should check that the SDCard is mounted
-//        // using Environment.getExternalStorageState() before doing this.
-//
-//        File mediaStorageDir = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
-//
-//        // This location works best if you want the created images to be shared
-//        // between applications and persist after your app has been uninstalled.
-//
-//        // Create the storage directory if it does not exist
-//        if (! mediaStorageDir.exists()){
-//            if (! mediaStorageDir.mkdirs()){
-//                Log.d("MyCameraApp", "failed to create directory");
-//                return null;
-//            }
-//        }
-//
-//        // Create a media file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss.SSS").format(new Date());
-//        File mediaFile;
-//        if (type == MEDIA_TYPE_IMAGE){
-//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-//                    "IMG_"+ timeStamp + ".jpg");
-//            fileNames.add(mediaFile);
-//
-//        } else if(type == MEDIA_TYPE_VIDEO) {
-//            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-//                    "VID_"+ timeStamp + ".mp4");
-//        } else {
-//            return null;
-//        }
-//        return mediaFile;
-//    }
+    }
+
+
+
+    @SuppressLint("SimpleDateFormat")
+    private File getOutputMediaFile(int type){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyCameraApp");
+
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss.SSS").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+            fileNames.add(mediaFile);
+
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+        return mediaFile;
+    }
 
     public void recordQRCode(){
+
+        // Custom Dialog
+        final AlertDialog.Builder mBuilder = new AlertDialog.Builder(EnterPasscode.this);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_camera, null);
+
+
+        // Saving passcode
+        btnFile = (Button) mView.findViewById(R.id.btn_fileFormat);
+        btnFile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                imgF = false;
+                intentCamera();
+                if (EnterPasscode.this.dialog!=null) {
+                    EnterPasscode.this.dialog.dismiss();
+                }
+            }
+        });
+
+        // Displaying passcode
+        btnImg = (Button) mView.findViewById(R.id.btn_imgFormat);
+        btnImg.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                imgF = true;
+                intentCamera();
+                if (EnterPasscode.this.dialog!=null) {
+                    EnterPasscode.this.dialog.dismiss();
+                }
+            }
+        });
+        mBuilder.setView(mView);
+        this.dialog = mBuilder.create();
+        this.dialog.show();
+
+
+
+    }
+
+    public void intentCamera(){
 
         if (!marshMallowPermission.checkPermissionForCamera()) {
             marshMallowPermission.requestPermissionForCamera();
@@ -169,14 +223,15 @@ public class EnterPasscode extends Activity {
         if (!marshMallowPermission.checkPermissionForRecord()) {
             marshMallowPermission.requestPermissionForRecord();
         }
+
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
-//
-//        // create a file to save the video
-//        fileUri = getOutputMediaFile(MEDIA_TYPE_VIDEO);
-//
-//        // set the image file name
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+
+        // create a file to save the video
+        fileUri = getOutputMediaFile(MEDIA_TYPE_VIDEO);
+
+        // set the image file name
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
 
         // set the video image quality to high
         intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
@@ -191,10 +246,9 @@ public class EnterPasscode extends Activity {
 
     // AsyncTask
     private class doit extends AsyncTask<Uri, Void, Integer> {
-        private ProgressDialog Dialog = new ProgressDialog(EnterPasscode.this);
         boolean passframe = false;
-        String qrText,qrText2,qrText3, fullString = "";
-
+        String qrText,qrText2,qrText3;
+        private ProgressDialog dialog ;
         // use hashset to remove any duplicates
         Set<String> noDup = new HashSet<String>();
 
@@ -203,8 +257,8 @@ public class EnterPasscode extends Activity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Dialog.setMessage("Loading please wait ...");
-            Dialog.show();
+            dialog = ProgressDialog.show(EnterPasscode.this, "",
+                    "Loading please wait ...", true);
         }
 
         @Override
@@ -306,48 +360,55 @@ public class EnterPasscode extends Activity {
                     String mergeStr = "";
                     while (iterator.hasNext()) {
                         mergeStr += iterator.next().toString().substring(2);
-
                     }
 
-                    File file;
-                    FileOutputStream outputStream;
+                    // if its a image file, we need to decode and save image
+                    if(imgF){
+                        Log.d("TAG","STRING IS ==> " + mergeStr);
+                        openDecodedImg(mergeStr);
+                        Log.d("TAG","IMAGE FILE");
 
-                    try {
-                        // TODO need to save into another created folder
+                    }else{
+                        Log.d("TAG","NORMAL FILE");
+                        File file;
+                        FileOutputStream outputStream;
 
-                        String filename = "QRCode_" + (new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())).format(new Date()) + ".txt";
-                        File folder = new File(Environment.getExternalStorageDirectory() +
-                                File.separator + "MultiplexedQR");
-                        boolean success = true;
-                        if (!folder.exists()) {
-                            success = folder.mkdirs();
+                        try {
+
+                            String filename = "QRCode_" + (new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())).format(new Date()) + ".txt";
+                            File folder = new File(Environment.getExternalStorageDirectory() +
+                                    File.separator + "MultiplexedQR");
+                            boolean success = true;
+                            if (!folder.exists()) {
+                                success = folder.mkdirs();
+                            }
+                            if (success) {
+                                // Do something on success
+                                file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
+                                outputStream = new FileOutputStream(file);
+                                outputStream.write(mergeStr.getBytes());
+                                outputStream.close();
+
+                                // open file from download folder
+                                File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                                FileOpen.openFile(EnterPasscode.this, myFile);
+                            } else {
+                                // Do something else on failure
+                                // Do something on success
+                                file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
+                                outputStream = new FileOutputStream(file);
+                                outputStream.write(mergeStr.getBytes());
+                                outputStream.close();
+
+                                // open file from download folder
+                                File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                                FileOpen.openFile(EnterPasscode.this, myFile);
+                            }
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                        if (success) {
-                            // Do something on success
-                            file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
-                            outputStream = new FileOutputStream(file);
-                            outputStream.write(mergeStr.getBytes());
-                            outputStream.close();
-
-                            // open file from download folder
-                            File myFile = new File(String.valueOf(file.getAbsoluteFile()));
-                            FileOpen.openFile(EnterPasscode.this, myFile);
-                        } else {
-                            // Do something else on failure
-                            // Do something on success
-                            file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
-                            outputStream = new FileOutputStream(file);
-                            outputStream.write(mergeStr.getBytes());
-                            outputStream.close();
-
-                            // open file from download folder
-                            File myFile = new File(String.valueOf(file.getAbsoluteFile()));
-                            FileOpen.openFile(EnterPasscode.this, myFile);
-                        }
-
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
 
                 } // END PASS
@@ -366,8 +427,8 @@ public class EnterPasscode extends Activity {
         @Override
         protected void onPostExecute(Integer result) {
 
-            if(Dialog != null && Dialog.isShowing()){
-                Dialog.dismiss();
+            if(dialog != null && dialog.isShowing()){
+                dialog.dismiss();
             }
 
             if(passframe==false){
@@ -429,27 +490,73 @@ public class EnterPasscode extends Activity {
 
     }
 
+
+    private void openDecodedImg(String base64Str){
+        byte[] decodedString = Base64.decode(base64Str, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        File file = null;
+        String filename = "QRCode_" + (new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault())).format(new Date()) + ".PNG";
+        File folder = new File(Environment.getExternalStorageDirectory() +
+                File.separator + "MultiplexedQR");
+        boolean success = true;
+        if (!folder.exists()) {
+            success = folder.mkdirs();
+        }
+        if (success) {
+            // Do something on success
+            FileOutputStream out = null;
+            try {
+                file = new File(getExternalStorageDirectory().getPath()+"/MultiplexedQR/", filename);
+                out = new FileOutputStream(file);
+                decodedByte.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                // PNG is a lossless format, the compression factor (100) is ignored
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (out != null) {
+                        out.close();
+                        // open file from download folder
+                        File myFile = new File(String.valueOf(file.getAbsoluteFile()));
+                        FileOpen.openFile(EnterPasscode.this, myFile);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
     private String decodeChecksum(String red, String green, String blue){
 
         String r = "",g = "",b = "",fullString = "";
 
         // Show the red frame number only as the header # of the frame (for sorting purposes)
-        if (red.substring(2,13)!=null) {
-            r = red.replace(red.substring(2, 13), "");
-
-        }else{
-            r = red.replace(red.substring(1,13),"");
+        if (red!=null) {
+            if(red.length()>13){
+                if (red.substring(0)!=null || !red.substring(0).equals("")) {
+                    r = red.replace(red.substring(2, 13), "");
+                    r = r.replace(r.substring(r.length()-3),"");
+                }
+            }
         }
 
-        r = r.replace(r.substring(r.length()-3),"");
 
-        if(green.length()>13||blue.length()>13){
-            g = green.replace(green.substring(0,13), "");
-            b = blue.replace(blue.substring(0,13), "");
+        if (green!=null){
+            if(green.length()>13) {
+                g = green.replace(green.substring(0, 13), "");
+                g = g.replace(g.substring(g.length()-3),"");
+            }
         }
 
-        g = g.replace(g.substring(g.length()-3),"");
-        b = b.replace(b.substring(b.length()-3),"");
+        if (blue!=null){
+            if(blue.length()>13){
+                b = blue.replace(blue.substring(0,13), "");
+                b = b.replace(b.substring(b.length()-3),"");
+            }
+        }
 
         // merge all the rgb frames together
         fullString = r + g + b;

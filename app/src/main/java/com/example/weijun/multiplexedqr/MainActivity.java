@@ -58,6 +58,7 @@ public class MainActivity extends Activity {
 
 
 	private Button mSendBtn;
+	private Button mSendImg;
 	private Button mQRbtn;
 
 	private static final int PICKFILE_RESULT_CODE = 100;
@@ -181,6 +182,15 @@ public class MainActivity extends Activity {
 		});
 
 
+		// Sending Image file
+		mSendImg = (Button) findViewById(R.id.button_sendImg);
+		mSendImg.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				sendImage();
+			}
+		});
+
+
 		// Reading from QR Code
 		mQRbtn = (Button) findViewById(R.id.btn_takeQR);
 		mQRbtn.setOnClickListener(new OnClickListener() {
@@ -215,22 +225,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-		// FOR QR RECEIVING CONTENT
-		IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-		if (result != null) {
-			if (result.getContents() == null) {
-				Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-			} else {
-				Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-				String msg = result.getContents();
-				Intent intent = new Intent(this, ReceiverView.class);
-				intent.putExtra("QRResult",msg);
-				startActivity(intent);
-			}
-		} else {
-			super.onActivityResult(requestCode, resultCode, data);
-		}
 
 		switch (requestCode) {
 
@@ -300,6 +294,14 @@ public class MainActivity extends Activity {
 			Intent selectFile = new Intent(Intent.ACTION_GET_CONTENT);
 			selectFile.setType("*/*");
 			startActivityForResult(selectFile,ACTIVITY_CHOOSE_FILE);  }
+	}
+
+
+	// TODO >> SEND IMAGE
+	private void sendImage() {
+		Intent intent = new Intent(
+				Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		startActivityForResult(intent, RESULT_LOAD_IMAGE);
 	}
 }
 

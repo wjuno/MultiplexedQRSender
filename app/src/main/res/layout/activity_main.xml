@@ -26,6 +26,16 @@
                     android:layout_toEndOf="@+id/btn_camera"
                     android:textColor="#000"
                     android:layout_gravity="center_horizontal" />
+                <Button
+                    android:id="@+id/button_sendImg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/button"
+                    android:text="IMG"
+                    android:layout_below="@+id/labelText_id"
+                    android:layout_toEndOf="@+id/btn_camera"
+                    android:textColor="#000"
+                    android:layout_gravity="center_horizontal" />
 
                 <Button
                     android:id="@+id/btn_takeQR"

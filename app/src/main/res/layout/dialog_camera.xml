@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:text="Choose file format"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        android:id="@+id/tv_title" />
+
+    <Button
+        android:id="@+id/btn_fileFormat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="File" />
+
+    <Button
+        android:id="@+id/btn_imgFormat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Image" />
+
+
+</LinearLayout>

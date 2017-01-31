@@ -1,10 +1,12 @@
 package com.example.weijun.multiplexedqr;
 import java.io.BufferedReader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.util.zip.CRC32;
@@ -29,6 +31,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
+
 import android.graphics.Canvas;
 import android.graphics.Color;
 
@@ -40,8 +43,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
-import android.os.Message;
+
 
 
 import android.util.Base64;
@@ -158,28 +160,6 @@ public class DisplayQRActivity extends Activity {
 				};
 				anim_qr.start();
 
-//				Message msg = new Message();
-//				Handler startAnimation = new Handler() {
-//					public void handleMessage(Message msg) {
-//						super.handleMessage(msg);
-//						// Pass our animation drawable to our custom drawable class
-//						CustomAnimationDrawableNew anim_qr = new CustomAnimationDrawableNew(animDrawable) {
-//							@Override
-//							void onAnimationFinish() {
-//								// Animation has finished...
-//								Log.d("SUCCESS","!!!");
-//								readyBtn.setText("DONE");
-//								readyBtn.setVisibility(View.VISIBLE);
-//							}
-//						};
-//						anim_qr.start();
-//						animDrawable.start();
-//						animDrawable.setOneShot(true);
-//
-//					}
-//				};
-//				startAnimation.sendMessage(msg);
-
 			}
 		});
 
@@ -291,13 +271,17 @@ public class DisplayQRActivity extends Activity {
 
 			try {
 				// decode if received flag = 0 decode file
-				if (flag == 0)
+				if (flag == 0) {
 					messagebyte = decodefile(message);
-
-
+					Log.d("RESULT", "Load File");
 					// decode if received flag = 1 decode image
-				else if (flag == 1)
+				}else if (flag == 1) {
+
+					// encode image to Base64
 					messagebyte = decodeimage(message);
+					Log.d("RESULT", "Load Image");
+
+				}
 			} catch (IOException e1) {
 				// Auto-generated catch block
 				e1.printStackTrace();
@@ -306,15 +290,10 @@ public class DisplayQRActivity extends Activity {
 			// encoding to multiplexed here.
 			try {
 
-				// encode the start passcode first
-			//	encodeqr(pwdCode);
+				Log.d("RESULT", "===> " + messagebyte);
 
 				// display multiplexed
 				encodeqr(messagebyte);
-
-				// encode the end passcode
-			//	encodeqr(pwdCode);
-
 
 
 			} catch (WriterException e) {
@@ -353,28 +332,41 @@ public class DisplayQRActivity extends Activity {
 			sb.append(line).append("\n");
 		}
 
-		Log.d("App TODO::: WEIJUN TEST", Integer.toString(sb.length()));
-		Log.d("App TODO::: WEIJUN TEST", sb.toString());
 		return sb.toString();
 
 	}
 
+
+
 	private String decodeimage(String FilePath) throws IOException {
-		File imagefile = new File(FilePath);
-		FileInputStream fis1 = null;
+		//encode image to base64 string
+//		File imagefile = new File(FilePath);
+//		FileInputStream fis1 = null;
+//		try {
+//			fis1 = new FileInputStream(imagefile);
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//		byte[] b = new byte[(int) imagefile.length()];
+//		FileInputStream fis = new FileInputStream(imagefile);
+//		fis.read(b);
+//		fis.close();
+//		return Base64.encodeToString(b, Base64.DEFAULT);
+
+		InputStream inputStream = new FileInputStream(FilePath);//You can get an inputStream using any IO API
+		byte[] bytes;
+		byte[] buffer = new byte[8192];
+		int bytesRead;
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		try {
-			fis1 = new FileInputStream(imagefile);
-		} catch (FileNotFoundException e) {
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				output.write(buffer, 0, bytesRead);
+			}
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		byte[] b = new byte[(int) imagefile.length()];
-		FileInputStream fis = new FileInputStream(imagefile);
-		fis.read(b);
-		fis.close();
-		String sb = Base64.encodeToString(b, Base64.NO_WRAP);
-		Log.d("App", Integer.toString(b.length));
-		Log.d("App", sb.toString());
-		return sb;
+		bytes = output.toByteArray();
+		return Base64.encodeToString(bytes, Base64.DEFAULT);
 
 
 	}
@@ -398,7 +390,7 @@ public class DisplayQRActivity extends Activity {
 		bitmap2 = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
 
 		//String repeated = new String(new char[100]).replace("\0", "0");
-	//	Log.d("REPEATED","String is : \n" + repeated);
+		//	Log.d("REPEATED","String is : \n" + repeated);
 
 		// this will be the starting flag QR code shown first (passcode)
 		performStart(pwdCode, 0);
@@ -411,11 +403,12 @@ public class DisplayQRActivity extends Activity {
 			j++;
 
 			// max 500 characters
-			if (strParse.length() / (j * 3) <= 500) {
+			if (strParse.length() / (j * 3) < 500) {
 				x = j;
 				break;
 			}
 		}
+
 
 		i = -((strParse.length() / (x * 3)) + 1);
 		while (i < strParse.length()) {
@@ -425,6 +418,7 @@ public class DisplayQRActivity extends Activity {
 			// checksum CRC32 - Frame Number --> 2 characters, checksum --> 11, string length --> 3 (since max is 500 characters in one frame)
 			checksumstr = String.format("%1$2s", frameno) + String.format("%1$11s", String.valueOf(checksum(sb))) + sb + String.format("%1$3s", sb.length());
 			Log.d("checksum_string", checksumstr + " | " + colorcode + "\n");
+
 
 			performQRencoding(checksumstr, colorcode);
 
@@ -438,6 +432,8 @@ public class DisplayQRActivity extends Activity {
 				colorcode = 1;
 			if (Math.min((i + strParse.length() / (x * 3)) + 1, strParse.length()) == strParse.length())
 				break;
+
+			Log.d("AppError", " +++>  " + Math.min((i + strParse.length() / (x * 3)) + 1, strParse.length()));
 		}
 
 		// this will be the ending flag QR code shown (passcode)
@@ -446,6 +442,8 @@ public class DisplayQRActivity extends Activity {
 		// after completed finished the progressbar
 
 	}
+
+
 
 	// method to encode base on colorcode
 	private void performQRencoding(String checksumstr, int colorcode) throws WriterException {

@@ -36,12 +36,6 @@
         <activity
             android:name=".DisplayBitmap"
             android:label="@string/title_activity_display_bitmap" />
-        <activity
-            android:name=".SenderView"
-            android:label="@string/title_activity_sender_screen" />
-        <activity
-            android:name=".DisplayPortQR"
-            android:label="@string/title_activity_display_port_qr" />
 
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
