@@ -251,7 +251,7 @@ public class EnterPasscode extends Activity {
         private ProgressDialog dialog ;
         // use hashset to remove any duplicates
         Set<String> noDup = new HashSet<String>();
-
+        private List<String> trackStrList = new ArrayList<String>();
 
         // TODO : Problem with Android Lollipop Dialog
         @Override
@@ -300,8 +300,8 @@ public class EnterPasscode extends Activity {
                             // Pass
                             // Call check multiplexed qr method
                             // Exit Loop
-                            Log.d("passcode","passcode1 pass");
-                            Log.d("passcode","passcode2 pass");
+                            Log.d("passcode","passcode1 == " + qrText);
+                            Log.d("passcode","passcode2 == " + userPass);
                             Log.d("vidDur", ": " + vidInit);
                             passframe = true;
                             break;
@@ -317,6 +317,7 @@ public class EnterPasscode extends Activity {
 
                 // only if pass validating then can proceed to decoding the rest of the file
                 if(passframe){
+
                     while (vidInit <= videoDur) {
                         Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
 
@@ -332,34 +333,60 @@ public class EnterPasscode extends Activity {
 
                         // Decode qr code
                         qrText = checkframe(decodeqrRed(bmFrame));
-                       // Log.d("QRTEXT", "Red Content is : " + qrText);
+                        Log.d("QRTEXT", "Red Content is : " + qrText);
                         qrText2 = checkframe(decodeqrGreen(bmFrame));
-                       // Log.d("QRTEXT", "Green Content is : " + qrText2);
+                        Log.d("QRTEXT", "Green Content is : " + qrText2);
                         qrText3 = checkframe(decodeqrBlue(bmFrame));
-                       // Log.d("QRTEXT", "Blue Content is : " + qrText3);
+                        Log.d("QRTEXT", "Blue Content is : " + qrText3);
 
                         // Make sure to check only the actual dataset (remove duplicates using hashset)
                         if(!qrText.equals(userPass)) {
-                            noDup.add(decodeChecksum(qrText,qrText2,qrText3));
+                            if(!decodeChecksum(qrText,qrText2,qrText3).equals("")){
+                                if(decodeChecksum(qrText,qrText2,qrText3).length()>5){
+                                    String trackString = decodeChecksum(qrText,qrText2,qrText3).substring(0,5);
+                                    trackStrList.add(trackString);
+                                }
+                                noDup.add(decodeChecksum(qrText,qrText2,qrText3));
+                            }
                         }
+
                         vidInit = vidInit + 500000;
 
-                        if(qrText.equals(userPass)){
-                            Log.d("QRTEXT","PASS!!!");
+                        // Searching for ending QR code
+                        if(vidInit > videoDur/1.5){
+                            if(qrText.equals(userPass)||qrText2.equals(userPass)||qrText3.equals(userPass)){
+                                Log.d("App","Pass Application");
+                                break;
+                            }
                         }
                     } // END WHILE
 
                     // Then we use treeset to do order sets into increasing order (Sorting)
                     TreeSet myTreeSet = new TreeSet();
-                    myTreeSet.addAll(noDup);
-                    Iterator iterator;
-                    iterator = myTreeSet.iterator();
-
-                    // displaying the decoded set data (cleaning)
-                    System.out.print("Tree set data: ");
                     String mergeStr = "";
-                    while (iterator.hasNext()) {
-                        mergeStr += iterator.next().toString().substring(2);
+
+                    if(!noDup.isEmpty()){
+                        myTreeSet.addAll(noDup);
+                        Iterator iterator;
+                        iterator = myTreeSet.iterator();
+
+                        // displaying the decoded set data (cleaning)
+                        System.out.print("Tree set data: ");
+
+                        // TODO
+
+                        while (iterator.hasNext()) {
+                            mergeStr += iterator.next().toString();
+
+                        }
+                    }
+
+                    // by using this replacing method then able to work else triming it before merging won't works
+                    for(int i=0; i<trackStrList.size();i++){
+                        Log.d("TAG","tracking: " + trackStrList.get(i));
+                        if(mergeStr.contains(trackStrList.get(i))){
+                            mergeStr = mergeStr.replaceAll(trackStrList.get(i).toString().substring(0,2),"");
+                        }
                     }
 
                     // if its a image file, we need to decode and save image
@@ -466,12 +493,12 @@ public class EnterPasscode extends Activity {
 
                 if (resultCode == RESULT_OK) {
 
-
+                    // TODO REMOVE TESTING VID
                     // get user permission first
-                    Uri videoUri = data.getData();
+                    //Uri videoUri = data.getData();
 
                     // use this video as test first.
-                    //Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.qr_multiplex);
+                    Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.testing);
 
                     if (!marshMallowPermission.checkPermissionForExternalStorage()) {
                         marshMallowPermission.requestPermissionForExternalStorage();
@@ -558,43 +585,53 @@ public class EnterPasscode extends Activity {
             }
         }
 
-        // merge all the rgb frames together
+
         fullString = r + g + b;
+        Log.d("ERROR1","Full String : ==> " + fullString);
+
 
         return fullString;
     }
 
+    // keep trying for 3 times
 
     private String checkframe(Bitmap pic){
+        boolean tries = false;
         Result result = null;
         int width1 = pic.getWidth(), height1 = pic.getHeight();
         int[] pixels = new int[width1 * height1];
         pic.getPixels(pixels, 0, width1, 0, 0, width1, height1);
         pic.recycle();
-        pic = null;
+
 
         LuminanceSource source = new RGBLuminanceSource(width1, height1, pixels);
         BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(source));
         QRCodeReader reader = new QRCodeReader();
 
+//        int count = 0;
+//        int maxTries = 20;
+//        while (true){
         try {
             Hashtable<DecodeHintType, Object> decodeHints = new Hashtable<DecodeHintType, Object>();
             decodeHints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-            result = reader.decode(bBitmap,decodeHints);
-        }
-        catch (NotFoundException e) {
-            Log.d("App","NotFoundException" + ": checkframe method");
-            return "null";
+            result = reader.decode(bBitmap, decodeHints);
+            return result.toString();
+
+        } catch (NotFoundException e) {
+            Log.d("App", "NotFoundException" + ": checkframe method");
+            // if (++count == maxTries){break;}
 
         } catch (ChecksumException e) {
-            Log.d("App","ChecksumException");
-            return "null";
+            Log.d("App", "ChecksumException");
+            // if (++count == maxTries){break;}
+
+        } catch (FormatException e) {
+            Log.d("App", "FormatException");
+            // if (++count == maxTries){break;}
         }
-        catch (FormatException e) {
-            Log.d("App","FormatException");
-            return "null";
-        }
-        return result.toString();
+ //       }
+
+        return "fffailll";
     }
 
     @SuppressLint("NewApi")
