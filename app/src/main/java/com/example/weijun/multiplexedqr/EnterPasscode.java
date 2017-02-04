@@ -215,6 +215,19 @@ public class EnterPasscode extends Activity {
 
     }
 
+    public boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch(NumberFormatException e) {
+            return false;
+        } catch(NullPointerException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
+
+
     public void intentCamera(){
 
         if (!marshMallowPermission.checkPermissionForCamera()) {
@@ -247,6 +260,7 @@ public class EnterPasscode extends Activity {
     // AsyncTask
     private class doit extends AsyncTask<Uri, Void, Integer> {
         boolean passframe = false;
+        boolean passframe2 = true;
         String qrText,qrText2,qrText3;
         private ProgressDialog dialog ;
         // use hashset to remove any duplicates
@@ -319,6 +333,7 @@ public class EnterPasscode extends Activity {
                 if(passframe){
 
                     while (vidInit <= videoDur) {
+                        Log.d("passcode","passcode duration => " + vidInit);
                         Bitmap bmFrame = mediaMetadataRetriever.getFrameAtTime(vidInit); //unit in microsecond
 
                         // Adjust the frame to make sure rotate to the correct position
@@ -331,34 +346,50 @@ public class EnterPasscode extends Activity {
                         // Setting the frame sizes for displaying (Testing purpose)
                         bmFrame = Bitmap.createScaledBitmap(bmFrame, 500, 800, false);
 
+
                         // Decode qr code
-                        qrText = checkframe(decodeqrRed(bmFrame));
-                        Log.d("QRTEXT", "Red Content is : " + qrText);
-                        qrText2 = checkframe(decodeqrGreen(bmFrame));
-                        Log.d("QRTEXT", "Green Content is : " + qrText2);
-                        qrText3 = checkframe(decodeqrBlue(bmFrame));
-                        Log.d("QRTEXT", "Blue Content is : " + qrText3);
+                        if(!checkframe(decodeqrRed(bmFrame)).equals("fffailll") && !checkframe(decodeqrGreen(bmFrame)).equals("fffailll") && !checkframe(decodeqrBlue(bmFrame)).equals("fffailll")){
+                            qrText = checkframe(decodeqrRed(bmFrame));
+                            Log.d("QRTEXT", "Red Content is : " + qrText);
+                            qrText2 = checkframe(decodeqrGreen(bmFrame));
+                            Log.d("QRTEXT", "Green Content is : " + qrText2);
+                            qrText3 = checkframe(decodeqrBlue(bmFrame));
+                            Log.d("QRTEXT", "Blue Content is : " + qrText3);
 
-                        // Make sure to check only the actual dataset (remove duplicates using hashset)
-                        if(!qrText.equals(userPass)) {
-                            if(!decodeChecksum(qrText,qrText2,qrText3).equals("")){
-                                if(decodeChecksum(qrText,qrText2,qrText3).length()>5){
-                                    String trackString = decodeChecksum(qrText,qrText2,qrText3).substring(0,5);
-                                    trackStrList.add(trackString);
+                            // Make sure to check only the actual dataset (remove duplicates using hashset)
+                            if(!qrText.equals(userPass)) {
+                                if (!decodeChecksum(qrText, qrText2, qrText3).equals("fffailll")) {
+                                    // TODO
+                                    if (isInteger(decodeChecksum(qrText, qrText2, qrText3).substring(0, 2)) || isInteger(decodeChecksum(qrText, qrText2, qrText3).substring(1, 2))) {
+                                        Log.d("TAG", "Integer string ==> " + decodeChecksum(qrText, qrText2, qrText3));
+                                        if (decodeChecksum(qrText, qrText2, qrText3).length() > 5) {
+                                            String trackString = decodeChecksum(qrText, qrText2, qrText3).substring(0, 5);
+                                            Log.d("TAG", "Track string ==> " + trackString);
+                                            trackStrList.add(trackString);
+                                        }
+                                        noDup.add(decodeChecksum(qrText, qrText2, qrText3));
+                                    }
                                 }
-                                noDup.add(decodeChecksum(qrText,qrText2,qrText3));
                             }
                         }
 
-                        vidInit = vidInit + 500000;
 
+
+
+                        // TODO: adjust the speed to read slower
+                        vidInit = vidInit + 250000;
+
+                        Log.d("TAG","RUNNING LENGTH IS :  " + vidInit + " | " + videoDur );
                         // Searching for ending QR code
-                        if(vidInit > videoDur/1.5){
-                            if(qrText.equals(userPass)||qrText2.equals(userPass)||qrText3.equals(userPass)){
-                                Log.d("App","Pass Application");
-                                break;
-                            }
-                        }
+
+
+//                        if(vidInit > videoDur/1.05){
+//                            Log.d("TAG","INIT LENGTH IS :  " + vidInit);
+//                            if(qrText.equals(userPass)||qrText2.equals(userPass)||qrText3.equals(userPass)){
+//                                Log.d("App","Pass Application");
+//                                break;
+//                            }
+//                        }
                     } // END WHILE
 
                     // Then we use treeset to do order sets into increasing order (Sorting)
@@ -373,7 +404,6 @@ public class EnterPasscode extends Activity {
                         // displaying the decoded set data (cleaning)
                         System.out.print("Tree set data: ");
 
-                        // TODO
 
                         while (iterator.hasNext()) {
                             mergeStr += iterator.next().toString();
@@ -475,6 +505,24 @@ public class EnterPasscode extends Activity {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
             }
+
+            if(passframe2==false){
+                // Invalid passcode
+                AlertDialog.Builder adb = new AlertDialog.Builder(EnterPasscode.this);
+                adb.setTitle("Missing Frame Captured")
+                        .setMessage("Please try again.")
+                        .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // go back to main page
+                                Intent intent = new Intent(EnterPasscode.this, EnterPasscode.class);
+                                startActivity(intent);
+                                finish();
+                                dialog.dismiss();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
         }
     }
 
@@ -495,10 +543,10 @@ public class EnterPasscode extends Activity {
 
                     // TODO REMOVE TESTING VID
                     // get user permission first
-                    //Uri videoUri = data.getData();
+                    Uri videoUri = data.getData();
 
                     // use this video as test first.
-                    Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.testing);
+                    //Uri videoUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.testing3);
 
                     if (!marshMallowPermission.checkPermissionForExternalStorage()) {
                         marshMallowPermission.requestPermissionForExternalStorage();
@@ -586,9 +634,12 @@ public class EnterPasscode extends Activity {
         }
 
 
-        fullString = r + g + b;
-        Log.d("ERROR1","Full String : ==> " + fullString);
-
+        if(red!=null && blue!=null && green!=null){
+            fullString = r + g + b;
+            Log.d("TAG","Full String : ==> " + fullString);
+        }else{
+            fullString = "fffailll";
+        }
 
         return fullString;
     }
@@ -596,7 +647,6 @@ public class EnterPasscode extends Activity {
     // keep trying for 3 times
 
     private String checkframe(Bitmap pic){
-        boolean tries = false;
         Result result = null;
         int width1 = pic.getWidth(), height1 = pic.getHeight();
         int[] pixels = new int[width1 * height1];
@@ -608,9 +658,7 @@ public class EnterPasscode extends Activity {
         BinaryBitmap bBitmap = new BinaryBitmap(new HybridBinarizer(source));
         QRCodeReader reader = new QRCodeReader();
 
-//        int count = 0;
-//        int maxTries = 20;
-//        while (true){
+
         try {
             Hashtable<DecodeHintType, Object> decodeHints = new Hashtable<DecodeHintType, Object>();
             decodeHints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
@@ -629,7 +677,7 @@ public class EnterPasscode extends Activity {
             Log.d("App", "FormatException");
             // if (++count == maxTries){break;}
         }
- //       }
+
 
         return "fffailll";
     }
@@ -647,7 +695,7 @@ public class EnterPasscode extends Activity {
 
 
 
-    // Decode the Red QR
+    // Decode the Red QR (uses OpenCV Imgproc to convert RGB to grayscale)
     private Bitmap decodeqrRed(Bitmap bm) {
         Mat src = new Mat(bm.getWidth(), bm.getHeight(), Imgproc.COLOR_BGR2GRAY);
         Utils.bitmapToMat(bm, src);

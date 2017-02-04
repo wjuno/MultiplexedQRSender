@@ -268,7 +268,6 @@ public class DisplayQRActivity extends Activity {
 			int flag = intent.getFlags();
 			String messagebyte = null;
 
-
 			try {
 				// decode if received flag = 0 decode file
 				if (flag == 0) {
@@ -278,6 +277,7 @@ public class DisplayQRActivity extends Activity {
 				}else if (flag == 1) {
 
 					// encode image to Base64
+					//messagebyte = decodeimage(message);
 					messagebyte = decodeimage(message);
 					Log.d("RESULT", "Load Image");
 
@@ -460,7 +460,7 @@ public class DisplayQRActivity extends Activity {
 			Canvas canvas = new Canvas(draw);
 			canvas.drawBitmap(bitmap1, 0, 0, new Paint());
 			frame1.draw(canvas);
-			animDrawable.addFrame(frame1, 1250);//flash every 0.5s
+			animDrawable.addFrame(frame1, 2500);//flash every 0.5s (1250)
 			bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 			bitmap1 = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		}
